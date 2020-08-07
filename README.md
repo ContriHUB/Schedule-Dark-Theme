@@ -7,7 +7,7 @@
 
 <a href="https://play.google.com/store/apps/details?id=com.alpha.dev.schedule_dark_theme"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="60px"/></a>
 
-<img alt="screenshot" src="images/Screenshot1.png" height="360px"/>    <img alt="screenshot" src="images/Screenshot2.png" height="360px"/>    <img alt="screenshot" src="images/Screenshot3.png" height="360px"/>    <img alt="screenshot" src="images/Screenshot4.png" height="360px"/>
+<img alt="screenshot" src="images/Screenshot1.png" height="490px"/>    <img alt="screenshot" src="images/Screenshot2.png" height="490px"/>    <img alt="screenshot" src="images/Screenshot3.png" height="490px"/>    <img alt="screenshot" src="images/Screenshot4.png" height="490px"/>
 
 <br><br>
 
