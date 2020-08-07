@@ -32,6 +32,8 @@ import com.alpha.dev.materialdialog.MaterialProgressDialog
 import com.alpha.dev.schedule_dark_theme.fragments.MainFeatureFragment
 import com.alpha.dev.schedule_dark_theme.fragments.WallpaperFeatureFragment
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
@@ -210,35 +212,37 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveImage(path: File, thumbPath: File, bitmap: Bitmap) {
+    private fun saveImage(path: File, thumbPath: File, bitmap: Bitmap) = async {
         var fos: FileOutputStream? = null
-        try {
-            fos = FileOutputStream(path)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-            bitmap.recycle()
-
-            var thumbFos: FileOutputStream? = null
+        launch(Dispatchers.IO) {
             try {
-                thumbFos = FileOutputStream(thumbPath)
-                val thumbBitmap = compressBitmap(path)
-                thumbBitmap?.compress(Bitmap.CompressFormat.PNG, 50, thumbFos)
-                thumbBitmap?.recycle()
-            } catch (e: java.lang.Exception) {
+                fos = FileOutputStream(path)
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
+                bitmap.recycle()
+
+                var thumbFos: FileOutputStream? = null
+                try {
+                    thumbFos = FileOutputStream(thumbPath)
+                    val thumbBitmap = compressBitmap(path)
+                    thumbBitmap?.compress(Bitmap.CompressFormat.PNG, 50, thumbFos)
+                    thumbBitmap?.recycle()
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                } finally {
+                    try {
+                        thumbFos?.close()
+                    } catch (e: java.lang.Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
                 try {
-                    thumbFos?.close()
-                } catch (e: java.lang.Exception) {
+                    fos?.close()
+                } catch (e: Exception) {
                     e.printStackTrace()
                 }
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            try {
-                fos?.close()
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
         }
     }

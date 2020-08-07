@@ -42,6 +42,10 @@ import com.alpha.dev.schedule_dark_theme.appService.ReceiverManager
 import com.google.android.material.card.MaterialCardView
 import com.ironz.binaryprefs.BinaryPreferencesBuilder
 import com.ironz.binaryprefs.Preferences
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -182,68 +186,76 @@ fun imageExists(context: Context, type: Int): Boolean = File(context.getDir(DIR,
     else -> FILE_WALL_DARK
 }).exists()
 
-fun getThumbImage(context: Context, type: Int): Bitmap? {
+fun getThumbImage(context: Context, type: Int): Bitmap? = async {
     val file = File(context.getDir(DIR, Context.MODE_PRIVATE), when (type) {
         LIGHT -> COMPRESS_LIGHT
         DARK -> COMPRESS_DARK
         WALL_LIGHT -> WALL_COMPRESS_LIGHT
         else -> WALL_COMPRESS_DARK
     })
-    var fis: FileInputStream? = null
-    try {
-        fis = FileInputStream(file)
-        return BitmapFactory.decodeStream(fis)
-    } catch (e: Exception) {
-        e.printStackTrace()
-        return null
-    } finally {
+
+    withContext(Dispatchers.IO) {
+        var fis: FileInputStream? = null
         try {
-            fis?.close()
+            fis = FileInputStream(file)
+            BitmapFactory.decodeStream(fis)
         } catch (e: Exception) {
             e.printStackTrace()
-            return null
+            null
+        } finally {
+            try {
+                fis?.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }
 
-fun getImage(context: Context, type: Int): Bitmap? {
+fun getImage(context: Context, type: Int): Bitmap? = async {
     val file = File(context.getDir(DIR, Context.MODE_PRIVATE), when (type) {
         LIGHT -> FILE_LIGHT
         DARK -> FILE_DARK
         WALL_LIGHT -> FILE_WALL_LIGHT
         else -> FILE_WALL_DARK
     })
-    var fis: FileInputStream? = null
-    try {
-        fis = FileInputStream(file)
-        return BitmapFactory.decodeStream(fis)
-    } catch (e: Exception) {
-        e.printStackTrace()
-        return null
-    } finally {
+
+    withContext(Dispatchers.IO) {
+        var fis: FileInputStream? = null
         try {
-            fis?.close()
+            fis = FileInputStream(file)
+            BitmapFactory.decodeStream(fis)
         } catch (e: Exception) {
             e.printStackTrace()
-            return null
+            null
+        } finally {
+            try {
+                fis?.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }
 
-fun getBitmap(cr: ContentResolver, uri: Uri): Bitmap {
-    val ins = cr.openInputStream(uri)
-    val bitmap = BitmapFactory.decodeStream(ins)
-    ins?.close()
-    return bitmap
+fun getBitmap(cr: ContentResolver, uri: Uri): Bitmap = async {
+    withContext(Dispatchers.IO) {
+        val ins = cr.openInputStream(uri)
+        val bitmap = BitmapFactory.decodeStream(ins)
+        ins?.close()
+        bitmap
+    }
 }
 
-fun compressBitmap(file: File): Bitmap? {
+fun compressBitmap(file: File): Bitmap? = async {
     val options = BitmapFactory.Options()
     options.inJustDecodeBounds = true
 
-    val ins = FileInputStream(file)
-    BitmapFactory.decodeStream(ins, null, options)
-    ins.close()
+    withContext(Dispatchers.IO) {
+        val ins = FileInputStream(file)
+        BitmapFactory.decodeStream(ins, null, options)
+        ins.close()
+    }
 
     var scale = 1
     while (options.outWidth / scale / 2 >= 100 && options.outHeight / scale / 2 >= 100) {
@@ -253,11 +265,12 @@ fun compressBitmap(file: File): Bitmap? {
     val finalOptions = BitmapFactory.Options()
     finalOptions.inSampleSize = scale
 
-    val inputStream = FileInputStream(file)
-    val out = BitmapFactory.decodeStream(inputStream, null, finalOptions)
-    inputStream.close()
-
-    return out
+    withContext(Dispatchers.IO) {
+        val inputStream = FileInputStream(file)
+        val out = BitmapFactory.decodeStream(inputStream, null, finalOptions)
+        inputStream.close()
+        out
+    }
 }
 
 fun toggleTheme(context: Context, bin: Int) {
@@ -321,8 +334,8 @@ fun systemToast(context: Context, message: String, duration: Int = Toast.LENGTH_
 }
 
 //fun getClosestMode(enableMilli: Long, disableMilli: Long): Int {
-    // Current time is more than both enableDarkMilli AND disableDarkMilli
-    // i.e. enableDarkMilli and disableDarkMilli is past with reference of current time
+// Current time is more than both enableDarkMilli AND disableDarkMilli
+// i.e. enableDarkMilli and disableDarkMilli is past with reference of current time
 //    if (System.currentTimeMillis() > enableMilli && System.currentTimeMillis() > disableMilli) {
 //        if ()
 //    }
@@ -441,3 +454,8 @@ fun Calendar.put(field: Int, value: Int): Calendar {
     this.set(field, value)
     return this
 }
+
+/**
+ * Simplifying coroutine call
+ */
+fun <T> async(block: suspend CoroutineScope.() -> T): T = runBlocking { withContext(Dispatchers.Default) { block() } }
