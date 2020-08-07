@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~ of this software and associated documentation files (the "Software"), to deal
+  ~ in the Software without restriction, including without limitation the rights
+  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is
+  ~ furnished to do so, subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all
+  ~ copies or substantial portions of the Software.
+  -->
+
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".LogActivity">
+
+    <com.alpha.dev.fastscroller.FastScrollScrollView
+        android:id="@+id/scv_log"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="56dp"
+        android:scrollbars="none">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/showLog"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"
+            android:fontFamily="@font/jet_brains_mono"
+            android:lineSpacingExtra="4dp"
+            android:padding="12dp"
+            android:textColor="@color/textColor" />
+
+    </com.alpha.dev.fastscroller.FastScrollScrollView>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/copyLog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:text="@string/copy"
+        android:textColor="@color/colorPrimary"
+        android:textStyle="bold"
+        app:backgroundTint="@color/colorAccent"
+        app:icon="@drawable/ic_content_copy_black_24dp"
+        app:iconTint="@color/colorPrimary"
+        app:rippleColor="@color/colorPrimary" />
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/clearLog"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:layout_margin="16dp"
+        android:text="@string/clear_log"
+        android:textAllCaps="false"
+        android:textColor="@color/colorAccent"
+        android:textStyle="bold"
+        app:backgroundTint="@color/colorPrimary"
+        app:icon="@drawable/ic_delete_forever_24px"
+        app:iconTint="@color/colorAccent"
+        app:rippleColor="@color/colorAccent" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,0 +1,56 @@
+<!--
+  ~ Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~ of this software and associated documentation files (the "Software"), to deal
+  ~ in the Software without restriction, including without limitation the rights
+  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is
+  ~ furnished to do so, subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all
+  ~ copies or substantial portions of the Software.
+  -->
+
+<resources>
+    <string name="app_name">Schedule Dark Theme</string>
+    <string name="permission_required">Permission Required</string>
+    <string name="permission_description">We need a special permission to be able to toggle dark theme as per schedule you choose</string>
+    <string name="steps">Steps :</string>
+    <string name="enable_developer_options">Enable Developer Options</string>
+    <string name="connect_to_computer_through_usb">Connect to Computer through USB</string>
+    <string name="download_adb">Download ADB</string>
+    <string name="run_command">Run Command</string>
+    <string name="check_permission">Check Permission</string>
+    <string name="enable_dark_theme_at">Enable Dark Theme at…</string>
+    <string name="disable_dark_theme_at">Disable Dark Theme at…</string>
+    <string name="_7_30_am">7:00 AM</string>
+    <string name="_8_00_pm">7:00 PM</string>
+    <string name="additional_setting">Additional Setting</string>
+    <string name="add_set">Send notification before changing theme when you are using phone so you will not get scared ? :P</string>
+    <string name="enable_feature">Enable Feature</string>
+    <string name="theme">App Theme</string>
+    <string name="dark">Dark</string>
+    <string name="light">Light</string>
+    <string name="system_default">System Default</string>
+    <string name="choose_theme">Choose Theme</string>
+    <string name="cancel">Cancel</string>
+    <string name="done">Done</string>
+    <string name="contact_developer">Contact Developer</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="rate_this_app">Rate</string>
+    <string name="share_this_app">Share this App</string>
+    <string name="yes_i_agree_to_the_information">Yes, I agree to the information</string>
+    <string name="sch_gen_info">The service checks time every 60 seconds starting from the time you enabled service.</string>
+    <string name="copy_command">Copy Command</string>
+    <string name="show_toast">Show Toasts</string>
+    <string name="wallpaper">Wallpaper</string>
+    <string name="toggle_theme_at">Toggle theme at…</string>
+    <string name="sunrise_sunset">Sunrise / Sunset</string>
+    <string name="theme_timing">Theme Timing</string>
+    <string name="time_slots">Time slots</string>
+    <string name="wall_feat_info">This feature will automatically change wallpaper when you manually toggle system theme.</string>
+    <string name="check_logs">Check Logs</string>
+    <string name="copy">Copy</string>
+    <string name="clear_log">Clear Log</string>
+</resources>
