@@ -26,6 +26,9 @@ import com.alpha.dev.fastscroller.ScrollingViewOnApplyWindowInsetsListener
 import com.alpha.dev.materialdialog.MaterialAlertDialog
 import com.alpha.dev.materialdialog.MaterialDialogInterface
 import kotlinx.android.synthetic.main.activity_log.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 
@@ -40,9 +43,9 @@ class LogActivity : AppCompatActivity() {
 
         var logsTxt = ""
         val file = File(filesDir, "sch_log.txt")
-        file.forEachLine { line -> logsTxt += "$line\n" }
-
-        showLog.text = logsTxt
+        CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) { file.forEachLine { line -> logsTxt += "$line\n" } }.invokeOnCompletion {
+            showLog.text = logsTxt
+        }
 
         copyLog.setOnClickListener {
             val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
