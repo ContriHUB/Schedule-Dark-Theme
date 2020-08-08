@@ -27,6 +27,7 @@ import android.icu.text.DateFormat
 import android.net.Uri
 import android.os.Handler
 import android.provider.Settings
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.widget.Toast
@@ -41,7 +42,10 @@ import com.alpha.dev.schedule_dark_theme.appService.ReceiverManager
 import com.google.android.material.card.MaterialCardView
 import com.ironz.binaryprefs.BinaryPreferencesBuilder
 import com.ironz.binaryprefs.Preferences
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -208,7 +212,7 @@ fun getThumbImage(context: Context, type: Int): Bitmap? = async {
     }
 }
 
-fun getImage(context: Context, type: Int, block: (bitmap: Bitmap?) -> Unit) = CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
+fun getImage(context: Context, type: Int): Bitmap? = async {
     val file = File(context.getDir(DIR, Context.MODE_PRIVATE), when (type) {
         LIGHT -> FILE_LIGHT
         DARK -> FILE_DARK
@@ -216,38 +220,42 @@ fun getImage(context: Context, type: Int, block: (bitmap: Bitmap?) -> Unit) = Co
         else -> FILE_WALL_DARK
     })
 
-    var fis: FileInputStream? = null
-    try {
-        fis = FileInputStream(file)
-        val out = BitmapFactory.decodeStream(fis)
-        withContext(Dispatchers.Main) { block(out) }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        withContext(Dispatchers.Main) { block(null) }
-    } finally {
+    withContext(Dispatchers.IO) {
+        var fis: FileInputStream? = null
         try {
-            fis?.close()
+            fis = FileInputStream(file)
+            BitmapFactory.decodeStream(fis)
         } catch (e: Exception) {
             e.printStackTrace()
-            withContext(Dispatchers.Main) { block(null) }
+            null
+        } finally {
+            try {
+                fis?.close()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }
 
-fun getBitmap(cr: ContentResolver, uri: Uri, block: (bitmap: Bitmap) -> Unit) = CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
-    val ins = cr.openInputStream(uri)
-    val bitmap = BitmapFactory.decodeStream(ins)
-    ins?.close()
-    withContext(Dispatchers.Main) { block(bitmap) }
+fun getBitmap(cr: ContentResolver, uri: Uri): Bitmap = async {
+    withContext(Dispatchers.IO) {
+        val ins = cr.openInputStream(uri)
+        val bitmap = BitmapFactory.decodeStream(ins)
+        ins?.close()
+        bitmap
+    }
 }
 
-fun compressBitmap(file: File, block: (bitmap: Bitmap?) -> Unit) = CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
+fun compressBitmap(file: File): Bitmap? = async {
     val options = BitmapFactory.Options()
     options.inJustDecodeBounds = true
 
-    val ins = FileInputStream(file)
-    BitmapFactory.decodeStream(ins, null, options)
-    ins.close()
+    withContext(Dispatchers.IO) {
+        val ins = FileInputStream(file)
+        BitmapFactory.decodeStream(ins, null, options)
+        ins.close()
+    }
 
     var scale = 1
     while (options.outWidth / scale / 2 >= 100 && options.outHeight / scale / 2 >= 100) {
@@ -257,11 +265,12 @@ fun compressBitmap(file: File, block: (bitmap: Bitmap?) -> Unit) = CoroutineScop
     val finalOptions = BitmapFactory.Options()
     finalOptions.inSampleSize = scale
 
-    val inputStream = FileInputStream(file)
-    val out = BitmapFactory.decodeStream(inputStream, null, finalOptions)
-    inputStream.close()
-
-    withContext(Dispatchers.Main) { block(out) }
+    withContext(Dispatchers.IO) {
+        val inputStream = FileInputStream(file)
+        val out = BitmapFactory.decodeStream(inputStream, null, finalOptions)
+        inputStream.close()
+        out
+    }
 }
 
 fun toggleTheme(context: Context, bin: Int) {
@@ -283,11 +292,10 @@ fun toggleTheme(context: Context, bin: Int) {
 
 fun updateWallpaper(context: Context, type: Int) {
     if (imageExists(context, type)) {
-        getImage(context, type) { bitmap ->
-            bitmap ?: return@getImage
-            WallpaperManager.getInstance(context).setBitmap(bitmap)
-            bitmap.recycle()
-        }
+        val bitmap = getImage(context, type)
+        bitmap ?: return
+        WallpaperManager.getInstance(context).setBitmap(bitmap)
+        bitmap.recycle()
     }
 }
 
@@ -381,6 +389,7 @@ fun scheduleTimely(manager: ReceiverManager, darkMilli: Long, lightMilli: Long) 
 }
 
 fun log(tag: String, message: String, context: Context) {
+    Log.d(tag, message)
     val file = File(context.filesDir, "sch_log.txt")
     var fos: FileOutputStream? = null
     try {

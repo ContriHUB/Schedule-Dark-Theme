@@ -131,83 +131,83 @@ class MainActivity : AppCompatActivity() {
             dialog.setCanceledOnTouchOutside(false)
             log("onActivityResult", "Starting process ...", this)
             Handler().postDelayed({
-                getBitmap(contentResolver, imgUri) { bitmap ->
-                    val dir = getDir(DIR, Context.MODE_PRIVATE)
-                    if (!dir.exists()) {
-                        dir.mkdir()
-                    }
-                    log(TAG, "REQUEST CODE => $requestCode", this)
-                    val path = File(dir, when (requestCode) {
-                        IMAGE_RETRIEVE_LIGHT -> {
-                            log(TAG, "path -> $FILE_LIGHT", this)
-                            FILE_LIGHT
-                        }
-                        IMAGE_RETRIEVE_DARK -> {
-                            log(TAG, "path -> $FILE_DARK", this)
-                            FILE_DARK
-                        }
-                        WALL_RETRIEVE_LIGHT -> {
-                            log(TAG, "path -> $FILE_WALL_LIGHT", this)
-                            FILE_WALL_LIGHT
-                        }
-                        else -> {
-                            log(TAG, "path -> $FILE_WALL_DARK", this)
-                            FILE_WALL_DARK
-                        }
-                    })
-                    val thumbPath = File(dir, when (requestCode) {
-                        IMAGE_RETRIEVE_LIGHT -> {
-                            log(TAG, "thumb path -> $COMPRESS_LIGHT", this)
-                            COMPRESS_LIGHT
-                        }
-                        IMAGE_RETRIEVE_DARK -> {
-                            log(TAG, "thumb path -> $COMPRESS_DARK", this)
-                            COMPRESS_DARK
-                        }
-                        WALL_RETRIEVE_LIGHT -> {
-                            log(TAG, "thumb path -> $WALL_COMPRESS_LIGHT", this)
-                            WALL_COMPRESS_LIGHT
-                        }
-                        else -> {
-                            log(TAG, "thumb path -> $WALL_COMPRESS_DARK", this)
-                            WALL_COMPRESS_DARK
-                        }
-                    })
-                    saveImage(path, thumbPath, bitmap)
+                val bitmap = getBitmap(contentResolver, imgUri)
 
-                    when (requestCode) {
-                        IMAGE_RETRIEVE_LIGHT -> {
-                            sImgView?.setImageBitmap(getThumbImage(this, LIGHT))
-                            sEmptyImg?.visibility = View.GONE
-                            sCardV?.visibility = View.VISIBLE
-
-                            sCheck?.isChecked = imageExists(this, LIGHT) || imageExists(this, DARK)
-                        }
-                        IMAGE_RETRIEVE_DARK -> {
-                            sImgView?.setImageBitmap(getThumbImage(this, DARK))
-                            sEmptyImg?.visibility = View.GONE
-                            sCardV?.visibility = View.VISIBLE
-
-                            sCheck?.isChecked = imageExists(this, LIGHT) || imageExists(this, DARK)
-                        }
-                        WALL_RETRIEVE_LIGHT -> {
-                            sImgView?.setImageBitmap(getThumbImage(this, WALL_LIGHT))
-                            sEmptyImg?.visibility = View.GONE
-                            sCardV?.visibility = View.VISIBLE
-
-                            sCheck?.isChecked = imageExists(this, WALL_LIGHT) || imageExists(this, WALL_DARK)
-                        }
-                        WALL_RETRIEVE_DARK -> {
-                            sImgView?.setImageBitmap(getThumbImage(this, WALL_DARK))
-                            sEmptyImg?.visibility = View.GONE
-                            sCardV?.visibility = View.VISIBLE
-
-                            sCheck?.isChecked = imageExists(this, WALL_LIGHT) || imageExists(this, WALL_DARK)
-                        }
-                    }
-                    resetStatic()
-                    dialog.dismiss()
+                val dir = getDir(DIR, Context.MODE_PRIVATE)
+                if (!dir.exists()) {
+                    dir.mkdir()
                 }
+                log(TAG, "REQUEST CODE => $requestCode", this)
+                val path = File(dir, when (requestCode) {
+                    IMAGE_RETRIEVE_LIGHT -> {
+                        log(TAG, "path -> $FILE_LIGHT", this)
+                        FILE_LIGHT
+                    }
+                    IMAGE_RETRIEVE_DARK -> {
+                        log(TAG, "path -> $FILE_DARK", this)
+                        FILE_DARK
+                    }
+                    WALL_RETRIEVE_LIGHT -> {
+                        log(TAG, "path -> $FILE_WALL_LIGHT", this)
+                        FILE_WALL_LIGHT
+                    }
+                    else -> {
+                        log(TAG, "path -> $FILE_WALL_DARK", this)
+                        FILE_WALL_DARK
+                    }
+                })
+                val thumbPath = File(dir, when (requestCode) {
+                    IMAGE_RETRIEVE_LIGHT -> {
+                        log(TAG, "thumb path -> $COMPRESS_LIGHT", this)
+                        COMPRESS_LIGHT
+                    }
+                    IMAGE_RETRIEVE_DARK -> {
+                        log(TAG, "thumb path -> $COMPRESS_DARK", this)
+                        COMPRESS_DARK
+                    }
+                    WALL_RETRIEVE_LIGHT -> {
+                        log(TAG, "thumb path -> $WALL_COMPRESS_LIGHT", this)
+                        WALL_COMPRESS_LIGHT
+                    }
+                    else -> {
+                        log(TAG, "thumb path -> $WALL_COMPRESS_DARK", this)
+                        WALL_COMPRESS_DARK
+                    }
+                })
+                saveImage(path, thumbPath, bitmap)
+
+                when (requestCode) {
+                    IMAGE_RETRIEVE_LIGHT -> {
+                        sImgView?.setImageBitmap(getThumbImage(this, LIGHT))
+                        sEmptyImg?.visibility = View.GONE
+                        sCardV?.visibility = View.VISIBLE
+
+                        sCheck?.isChecked = imageExists(this, LIGHT) || imageExists(this, DARK)
+                    }
+                    IMAGE_RETRIEVE_DARK -> {
+                        sImgView?.setImageBitmap(getThumbImage(this, DARK))
+                        sEmptyImg?.visibility = View.GONE
+                        sCardV?.visibility = View.VISIBLE
+
+                        sCheck?.isChecked = imageExists(this, LIGHT) || imageExists(this, DARK)
+                    }
+                    WALL_RETRIEVE_LIGHT -> {
+                        sImgView?.setImageBitmap(getThumbImage(this, WALL_LIGHT))
+                        sEmptyImg?.visibility = View.GONE
+                        sCardV?.visibility = View.VISIBLE
+
+                        sCheck?.isChecked = imageExists(this, WALL_LIGHT) || imageExists(this, WALL_DARK)
+                    }
+                    WALL_RETRIEVE_DARK -> {
+                        sImgView?.setImageBitmap(getThumbImage(this, WALL_DARK))
+                        sEmptyImg?.visibility = View.GONE
+                        sCardV?.visibility = View.VISIBLE
+
+                        sCheck?.isChecked = imageExists(this, WALL_LIGHT) || imageExists(this, WALL_DARK)
+                    }
+                }
+                resetStatic()
+                dialog.dismiss()
             }, 50)
         }
     }
@@ -223,10 +223,9 @@ class MainActivity : AppCompatActivity() {
                 var thumbFos: FileOutputStream? = null
                 try {
                     thumbFos = FileOutputStream(thumbPath)
-                    compressBitmap(path) { thumbBitmap ->
-                        thumbBitmap?.compress(Bitmap.CompressFormat.PNG, 50, thumbFos)
-                        thumbBitmap?.recycle()
-                    }
+                    val thumbBitmap = compressBitmap(path)
+                    thumbBitmap?.compress(Bitmap.CompressFormat.PNG, 50, thumbFos)
+                    thumbBitmap?.recycle()
                 } catch (e: java.lang.Exception) {
                     e.printStackTrace()
                 } finally {
