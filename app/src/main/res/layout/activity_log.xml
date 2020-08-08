@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -39,6 +38,12 @@
             android:textColor="@color/textColor" />
 
     </com.alpha.dev.fastscroller.FastScrollScrollView>
+
+    <ProgressBar
+        android:id="@+id/l_pr"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:layout_gravity="center" />
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/copyLog"

@@ -92,7 +92,7 @@ class OperationObserver : BroadcastReceiver() {
                     e.printStackTrace()
                 }
                 message += "Light was recreated again\n"
-                message += "Need a day = $needADay"
+                message += "Need a day = $needADay\n"
                 manager.createOrRecreateOperation(ReceiverManager.LIGHT_ID, if (needADay) disableMilli + ReceiverManager.REPEAT_INTERVAL else disableMilli)
             } else {
                 message += "Light was already running\n"
@@ -113,7 +113,7 @@ class OperationObserver : BroadcastReceiver() {
                     e.printStackTrace()
                 }
                 message += "Dark was recreated again\n"
-                message += "Needed a day = $needADay"
+                message += "Needed a day = $needADay\n"
                 manager.createOrRecreateOperation(ReceiverManager.DARK_ID, if (needADay) enableMilli + ReceiverManager.REPEAT_INTERVAL else enableMilli)
             } else {
                 message += "Dark was already running\n"

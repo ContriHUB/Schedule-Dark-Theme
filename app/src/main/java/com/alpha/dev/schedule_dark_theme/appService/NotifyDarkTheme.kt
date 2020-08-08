@@ -17,12 +17,10 @@ package com.alpha.dev.schedule_dark_theme.appService
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.hardware.display.DisplayManager
 import android.view.Display
-import com.alpha.dev.schedule_dark_theme.DARK
-import com.alpha.dev.schedule_dark_theme.LOCK_PREF
-import com.alpha.dev.schedule_dark_theme.PreferenceHelper
-import com.alpha.dev.schedule_dark_theme.toggleTheme
+import com.alpha.dev.schedule_dark_theme.*
 
 class NotifyDarkTheme : BroadcastReceiver() {
 
@@ -30,15 +28,17 @@ class NotifyDarkTheme : BroadcastReceiver() {
         val helper = NotificationHelper(context)
         val displayManager = context.applicationContext.getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
 
-        if (displayManager.getDisplay(0).state == Display.STATE_ON) {
-            if (PreferenceHelper(context).getBoolean(LOCK_PREF, false)) {
-                helper.recreateChannel()
-                helper.getManager().notify(3, helper.darkRunningNotification().build())
+        if (context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK != Configuration.UI_MODE_NIGHT_YES) {
+            if (displayManager.getDisplay(0).state == Display.STATE_ON) {
+                if (PreferenceHelper(context).getBoolean(LOCK_PREF, false)) {
+                    helper.recreateChannel()
+                    helper.getManager().notify(3, helper.darkRunningNotification().build())
+                } else {
+                    toggleTheme(context, DARK)
+                }
             } else {
                 toggleTheme(context, DARK)
             }
-        } else {
-            toggleTheme(context, DARK)
-        }
+        } else log("NotifyDarkTheme", "System theme was already DARK", context)
     }
 }

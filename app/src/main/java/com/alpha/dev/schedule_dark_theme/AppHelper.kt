@@ -27,7 +27,6 @@ import android.icu.text.DateFormat
 import android.net.Uri
 import android.os.Handler
 import android.provider.Settings
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.widget.Toast
@@ -389,7 +388,6 @@ fun scheduleTimely(manager: ReceiverManager, darkMilli: Long, lightMilli: Long) 
 }
 
 fun log(tag: String, message: String, context: Context) {
-    Log.d(tag, message)
     val file = File(context.filesDir, "sch_log.txt")
     var fos: FileOutputStream? = null
     try {
