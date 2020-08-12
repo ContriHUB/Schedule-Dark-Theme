@@ -19,8 +19,6 @@ import android.content.Intent
 import android.icu.text.DateFormat
 import android.icu.text.SimpleDateFormat
 import android.os.Bundle
-import android.os.Handler
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,21 +35,19 @@ import com.alpha.dev.materialdialog.MaterialAlertDialog
 import com.alpha.dev.materialdialog.MaterialDialogInterface
 import com.alpha.dev.schedule_dark_theme.*
 import com.alpha.dev.schedule_dark_theme.appService.Interfaces
-import com.alpha.dev.schedule_dark_theme.appService.ReceiverManager
+import com.alpha.dev.schedule_dark_theme.appService.services.ServiceObserver
+import com.alpha.dev.schedule_dark_theme.appService.services.ThemeService
 import com.google.android.material.card.MaterialCardView
 import java.io.File
 import java.util.*
 
 class MainFeatureFragment(context: Context, private val activity: AppCompatActivity) : Fragment() {
 
-    companion object {
-        const val TAG = "MainFeatureFragment"
-    }
+    private val lTag = "MainFeatureFragment"
 
     private val ctx = context
 
     private val pref by lazy { PreferenceHelper(context) }
-    private val manager by lazy { ReceiverManager(context) }
     private lateinit var scv: FastScrollScrollView
 
     private lateinit var enableTime: AppCompatTextView
@@ -115,7 +111,9 @@ class MainFeatureFragment(context: Context, private val activity: AppCompatActiv
         wallCheck.isChecked = pref.getBoolean(WALLPAPER_ENABLED, false)
 
         if (switchFeature.isChecked) {
-            manager.checkOnObserver()
+            if (!ServiceObserver.getThemeRunning()) {
+                ctx.startService(Intent(ctx, ThemeService::class.java))
+            }
         }
 
         lockSet.setOnCheckedChangeListener { _, isChecked -> toggleLockPref(isChecked) }
@@ -177,7 +175,7 @@ class MainFeatureFragment(context: Context, private val activity: AppCompatActiv
         if (imageExists(ctx, LIGHT)) {
             val lB = getThumbImage(ctx, LIGHT)
             if (lB != null) {
-                log(TAG, "$FILE_LIGHT exist -> $COMPRESS_LIGHT is loaded", ctx)
+                log(lTag, "$FILE_LIGHT exist -> $COMPRESS_LIGHT is loaded", ctx)
                 lightWallpaper.setImageBitmap(lB)
                 lEmpty.visibility = View.GONE
                 lRemove.visibility = View.VISIBLE
@@ -186,7 +184,7 @@ class MainFeatureFragment(context: Context, private val activity: AppCompatActiv
         if (imageExists(ctx, DARK)) {
             val dB = getThumbImage(ctx, DARK)
             if (dB != null) {
-                log(TAG, "$FILE_DARK exist -> $COMPRESS_DARK is loaded", ctx)
+                log(lTag, "$FILE_DARK exist -> $COMPRESS_DARK is loaded", ctx)
                 darkWallpaper.setImageBitmap(dB)
                 dEmpty.visibility = View.GONE
                 dRemove.visibility = View.VISIBLE
@@ -274,35 +272,17 @@ class MainFeatureFragment(context: Context, private val activity: AppCompatActiv
     }
 
     private fun toggleFeature(boolean: Boolean) {
-        Log.d("CHECK", "$boolean")
-        val mode = pref.getInt(TRIGGER_TIME, TIME_SLOTS)
+        log("CHECK", "$boolean", ctx)
         if (boolean) {
             if (pref.getBoolean(WALL_FEATURE, false)) {
                 systemToast(ctx, "Both features cannot be enabled at once")
                 switchFeature.isChecked = false
                 return
             }
-            if (mode == TIME_SLOTS) {
-                scheduleTimely(manager, manager.getLatestMilli(pref.getLong(TIME_ENABLE, DEFAULT_ENABLE_TIME)), manager.getLatestMilli(pref.getLong(TIME_DISABLE, DEFAULT_DISABLE_TIME)))
-            } else {
-                scheduleTimely(manager, manager.getLatestMilli(pref.getLong(SUNSET_TIME, DEFAULT_ENABLE_TIME)), manager.getLatestMilli(pref.getLong(SUNRISE_TIME, DEFAULT_DISABLE_TIME)))
-            }
+            ctx.startService(Intent(ctx, ThemeService::class.java))
             pref.putBoolean(ENABLE_FEATURE, boolean)
         } else {
-            if (manager.isReceiverRunning(ReceiverManager.DARK_ID)) {
-                manager.cancelReceiver(ReceiverManager.DARK_ID)
-
-                Handler().postDelayed({
-                    log("Toggle Feature", "dark running -> ${manager.isReceiverRunning(ReceiverManager.DARK_ID)}", ctx)
-                }, 500)
-            }
-            if (manager.isReceiverRunning(ReceiverManager.LIGHT_ID)) {
-                manager.cancelReceiver(ReceiverManager.LIGHT_ID)
-
-                Handler().postDelayed({
-                    log("Toggle Feature", "light running -> ${manager.isReceiverRunning(ReceiverManager.LIGHT_ID)}", ctx)
-                }, 500)
-            }
+            ctx.stopService(Intent(ctx, ThemeService::class.java))
             pref.putBoolean(ENABLE_FEATURE, boolean)
         }
     }

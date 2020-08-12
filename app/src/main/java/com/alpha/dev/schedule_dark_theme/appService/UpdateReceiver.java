@@ -17,12 +17,14 @@ package com.alpha.dev.schedule_dark_theme.appService;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Log;
 
 import com.alpha.dev.schedule_dark_theme.PreferenceHelper;
+import com.alpha.dev.schedule_dark_theme.appService.services.ThemeService;
+import com.alpha.dev.schedule_dark_theme.appService.services.WallpaperService;
 
 import static com.alpha.dev.schedule_dark_theme.AppHelperKt.ENABLE_FEATURE;
 import static com.alpha.dev.schedule_dark_theme.AppHelperKt.WALL_FEATURE;
+import static com.alpha.dev.schedule_dark_theme.AppHelperKt.log;
 
 public class UpdateReceiver extends BroadcastReceiver {
 
@@ -32,10 +34,10 @@ public class UpdateReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction() != null) {
             if (intent.getAction().equals(Intent.ACTION_MY_PACKAGE_REPLACED)) {
+                log(TAG, "onReceive: Update Called", context);
                 PreferenceHelper pref = new PreferenceHelper(context);
                 if (pref.getBoolean(ENABLE_FEATURE, false)) {
-                    Log.d(TAG, "onReceive: Update Called");
-                    new ReceiverManager(context).checkOnObserver();
+                    context.startForegroundService(new Intent(context, ThemeService.class));
                 } else if (pref.getBoolean(WALL_FEATURE, false)) {
                     context.startForegroundService(new Intent(context, WallpaperService.class));
                 }

@@ -15,7 +15,6 @@
 package com.alpha.dev.schedule_dark_theme
 
 import android.Manifest
-import android.app.AlarmManager
 import android.app.UiModeManager
 import android.app.WallpaperManager
 import android.content.ContentResolver
@@ -27,6 +26,7 @@ import android.icu.text.DateFormat
 import android.net.Uri
 import android.os.Handler
 import android.provider.Settings
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.widget.Toast
@@ -37,14 +37,10 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.alpha.dev.schedule_dark_theme.appService.ReceiverManager
 import com.google.android.material.card.MaterialCardView
 import com.ironz.binaryprefs.BinaryPreferencesBuilder
 import com.ironz.binaryprefs.Preferences
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -145,9 +141,6 @@ private var preference: Preferences? = null
 @Volatile
 private var layoutInflater: LayoutInflater? = null
 
-@Volatile
-private var alarmManager: AlarmManager? = null
-
 fun getUiManager(context: Context): UiModeManager {
     if (uiModeManager == null) {
         uiModeManager = context.applicationContext.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
@@ -160,13 +153,6 @@ fun getLayoutInflater(context: Context): LayoutInflater {
         layoutInflater = context.applicationContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     }
     return layoutInflater!!
-}
-
-fun getAlarmManager(context: Context): AlarmManager {
-    if (alarmManager == null) {
-        alarmManager = context.applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    }
-    return alarmManager!!
 }
 
 fun permissionGranted(context: Context): Boolean = context.applicationContext.checkCallingOrSelfPermission("android.permission.WRITE_SECURE_SETTINGS") == PackageManager.PERMISSION_GRANTED
@@ -293,8 +279,10 @@ fun updateWallpaper(context: Context, type: Int) {
     if (imageExists(context, type)) {
         val bitmap = getImage(context, type)
         bitmap ?: return
-        WallpaperManager.getInstance(context).setBitmap(bitmap)
-        bitmap.recycle()
+        CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
+            WallpaperManager.getInstance(context).setBitmap(bitmap)
+            bitmap.recycle()
+        }
     }
 }
 
@@ -332,62 +320,8 @@ fun systemToast(context: Context, message: String, duration: Int = Toast.LENGTH_
     }
 }
 
-//fun getClosestMode(enableMilli: Long, disableMilli: Long): Int {
-// Current time is more than both enableDarkMilli AND disableDarkMilli
-// i.e. enableDarkMilli and disableDarkMilli is past with reference of current time
-//    if (System.currentTimeMillis() > enableMilli && System.currentTimeMillis() > disableMilli) {
-//        if ()
-//    }
-//    return 1
-//}
-
-/**
- * The ...
- * @param darkMilli AND
- * @param lightMilli
- * -> should be latest milliseconds
- */
-fun scheduleTimely(manager: ReceiverManager, darkMilli: Long, lightMilli: Long) = lazy {
-    val currentMilli = System.currentTimeMillis()
-
-    if (currentMilli in lightMilli..darkMilli) {    // current time is between light and dark time
-        if (lightMilli > darkMilli) {   // light is still ahead of dark
-            // enable dark theme AND light theme
-            manager.createOrRecreateOperation(ReceiverManager.DARK_ID, darkMilli)
-            manager.createOrRecreateOperation(ReceiverManager.LIGHT_ID, lightMilli)
-        } else {
-            if (darkMilli > lightMilli) {
-                // enable light theme AND dark theme
-                manager.createOrRecreateOperation(ReceiverManager.LIGHT_ID, lightMilli)
-                manager.createOrRecreateOperation(ReceiverManager.DARK_ID, darkMilli)
-            }
-        }
-    } else if (currentMilli > lightMilli && currentMilli > darkMilli) {    // light and dark, current time had already part both
-        if (lightMilli > darkMilli) {
-            // enable light theme and postpone the dark theme to a day ahead
-            manager.createOrRecreateOperation(ReceiverManager.LIGHT_ID, lightMilli)
-
-            // adding a day
-            manager.createOrRecreateOperation(ReceiverManager.DARK_ID, darkMilli + ReceiverManager.REPEAT_INTERVAL)
-        } else {
-            if (darkMilli > lightMilli) {
-                // enable dark theme and postpone the light theme to a day ahead
-                manager.createOrRecreateOperation(ReceiverManager.DARK_ID, darkMilli)
-
-                // adding a day
-                manager.createOrRecreateOperation(ReceiverManager.LIGHT_ID, lightMilli + ReceiverManager.REPEAT_INTERVAL)
-            }
-        }
-    } else {
-        if (currentMilli < lightMilli && currentMilli < darkMilli) {
-            // enable both theme time normally
-            manager.createOrRecreateOperation(ReceiverManager.LIGHT_ID, lightMilli)
-            manager.createOrRecreateOperation(ReceiverManager.DARK_ID, darkMilli)
-        }
-    }
-}
-
 fun log(tag: String, message: String, context: Context) {
+    Log.d(tag, message)
     val file = File(context.filesDir, "sch_log.txt")
     var fos: FileOutputStream? = null
     try {

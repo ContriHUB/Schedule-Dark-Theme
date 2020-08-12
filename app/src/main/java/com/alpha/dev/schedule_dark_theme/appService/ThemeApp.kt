@@ -14,16 +14,13 @@
 
 package com.alpha.dev.schedule_dark_theme.appService
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import com.alpha.dev.schedule_dark_theme.LIGHT
-import com.alpha.dev.schedule_dark_theme.toggleTheme
+import android.app.Application
+import com.alpha.dev.schedule_dark_theme.appService.services.ServiceObserver
 
-class ToggleLightTheme : BroadcastReceiver() {
+class ThemeApp : Application() {
 
-    override fun onReceive(context: Context, intent: Intent?) {
-        toggleTheme(context, LIGHT)
-        NotificationHelper(context).getManager().cancel(3)
+    override fun onCreate() {
+        ServiceObserver.createInstance()
+        super.onCreate()
     }
 }

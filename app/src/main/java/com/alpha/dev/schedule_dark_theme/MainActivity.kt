@@ -96,11 +96,11 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
 
-                R.id.checkLog -> {
+                /*R.id.checkLog -> {
                     log("Main/Toolbar", "Clicked item -> Check Log", this)
                     startActivity(Intent(this, LogActivity::class.java))
                     true
-                }
+                }*/
                 else -> false
             }
         }

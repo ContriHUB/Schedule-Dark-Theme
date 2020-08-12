@@ -12,13 +12,15 @@
  * copies or substantial portions of the Software.
  */
 
-package com.alpha.dev.schedule_dark_theme.appService;
+package com.alpha.dev.schedule_dark_theme.appService.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
 import com.alpha.dev.schedule_dark_theme.PreferenceHelper;
+import com.alpha.dev.schedule_dark_theme.appService.services.ThemeService;
+import com.alpha.dev.schedule_dark_theme.appService.services.WallpaperService;
 
 import static com.alpha.dev.schedule_dark_theme.AppHelperKt.ENABLE_FEATURE;
 import static com.alpha.dev.schedule_dark_theme.AppHelperKt.WALL_FEATURE;
@@ -31,7 +33,7 @@ public class AutoStartUp extends BroadcastReceiver {
             if (intent.getAction().equals(Intent.ACTION_BOOT_COMPLETED) || intent.getAction().equals("android.intent.action.QUICKBOOT_POWERON")) {
                 PreferenceHelper pref = new PreferenceHelper(context);
                 if (pref.getBoolean(ENABLE_FEATURE, false)) {
-                    new ReceiverManager(context).checkOnObserver();
+                    context.startForegroundService(new Intent(context, ThemeService.class));
                 } else if (pref.getBoolean(WALL_FEATURE, false)) {
                     context.startForegroundService(new Intent(context, WallpaperService.class));
                 }

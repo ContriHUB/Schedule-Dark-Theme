@@ -30,7 +30,8 @@ import com.alpha.dev.fastscroller.ScrollingViewOnApplyWindowInsetsListener
 import com.alpha.dev.materialdialog.MaterialAlertDialog
 import com.alpha.dev.materialdialog.MaterialDialogInterface
 import com.alpha.dev.schedule_dark_theme.*
-import com.alpha.dev.schedule_dark_theme.appService.WallpaperService
+import com.alpha.dev.schedule_dark_theme.appService.services.ServiceObserver
+import com.alpha.dev.schedule_dark_theme.appService.services.WallpaperService
 import com.google.android.material.card.MaterialCardView
 import java.io.File
 
@@ -162,12 +163,12 @@ class WallpaperFeatureFragment(context: Context, private val activity: AppCompat
                 return
             }
             pref.putBoolean(WALL_FEATURE, checked)
-            if (!WallpaperService.started) {
+            if (!ServiceObserver.getWallpaperRunning()) {
                 ctx.startService(Intent(ctx, WallpaperService::class.java))
             }
         } else {
             pref.putBoolean(WALL_FEATURE, checked)
-            if (WallpaperService.started) {
+            if (ServiceObserver.getWallpaperRunning()) {
                 ctx.stopService(Intent(ctx, WallpaperService::class.java))
             }
         }

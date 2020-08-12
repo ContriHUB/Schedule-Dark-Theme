@@ -24,6 +24,9 @@ import android.graphics.Color
 import android.provider.Settings
 import androidx.core.app.NotificationCompat
 import com.alpha.dev.schedule_dark_theme.R
+import com.alpha.dev.schedule_dark_theme.appService.receivers.CancelSwitch
+import com.alpha.dev.schedule_dark_theme.appService.receivers.ToggleDarkTheme
+import com.alpha.dev.schedule_dark_theme.appService.receivers.ToggleLightTheme
 
 class NotificationHelper(ctx: Context) : ContextWrapper(ctx) {
 

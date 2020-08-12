@@ -16,11 +16,9 @@ package com.alpha.dev.schedule_dark_theme
 
 import android.content.Context
 import android.os.Bundle
-import android.os.Handler
 import android.view.View
 import androidx.appcompat.app.AppCompatDialog
 import com.alpha.dev.schedule_dark_theme.appService.Interfaces
-import com.alpha.dev.schedule_dark_theme.appService.ReceiverManager
 import com.google.android.material.card.MaterialCardView
 import kotlinx.android.synthetic.main.trigger_layout.*
 import java.util.*
@@ -35,14 +33,12 @@ class TimeTrigger(context: Context, private val listener: Interfaces.OnTriggerCh
         setContentView(R.layout.trigger_layout)
         window!!.setBackgroundDrawableResource(R.drawable.bg_recent)
 
-        val manager = ReceiverManager(ctx)
         val pref = PreferenceHelper(ctx)
         when (pref.getInt(TRIGGER_TIME, TIME_SLOTS)) {
             TIME_SLOTS -> timeCheck.isChecked = true
             SUN_SET_RISE -> sunCheck.isChecked = true
         }
 
-        val running = pref.getBoolean(ENABLE_FEATURE, false)
         timeCheck.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 pref.putInt(TRIGGER_TIME, TIME_SLOTS)
@@ -51,27 +47,6 @@ class TimeTrigger(context: Context, private val listener: Interfaces.OnTriggerCh
                 sunCard.visibility = View.GONE
                 dCard.visibility = View.VISIBLE
                 lCard.visibility = View.VISIBLE
-
-                if (manager.isReceiverRunning(ReceiverManager.DARK_ID)) {
-                    manager.cancelReceiver(ReceiverManager.DARK_ID)
-
-                    Handler().postDelayed({
-                        log("Trigger", "dark running -> ${manager.isReceiverRunning(ReceiverManager.DARK_ID)}", ctx)
-                    }, 500)
-                }
-                if (manager.isReceiverRunning(ReceiverManager.LIGHT_ID)) {
-                    manager.cancelReceiver(ReceiverManager.LIGHT_ID)
-
-                    Handler().postDelayed({
-                        log("Trigger", "light running -> ${manager.isReceiverRunning(ReceiverManager.LIGHT_ID)}", ctx)
-                    }, 500)
-                }
-
-                Handler().postDelayed({
-                    if (running) {
-                        scheduleTimely(manager, manager.getLatestMilli(pref.getLong(TIME_ENABLE, DEFAULT_ENABLE_TIME)), manager.getLatestMilli(pref.getLong(TIME_DISABLE, DEFAULT_DISABLE_TIME)))
-                    }
-                }, 500)
 
                 dismiss()
             }
@@ -86,32 +61,11 @@ class TimeTrigger(context: Context, private val listener: Interfaces.OnTriggerCh
                 dCard.visibility = View.GONE
                 lCard.visibility = View.GONE
 
-                if (manager.isReceiverRunning(ReceiverManager.DARK_ID)) {
-                    manager.cancelReceiver(ReceiverManager.DARK_ID)
-
-                    Handler().postDelayed({
-                        log("Trigger", "dark running -> ${manager.isReceiverRunning(ReceiverManager.DARK_ID)}", ctx)
-                    }, 500)
-                }
-                if (manager.isReceiverRunning(ReceiverManager.LIGHT_ID)) {
-                    manager.cancelReceiver(ReceiverManager.LIGHT_ID)
-
-                    Handler().postDelayed({
-                        log("Trigger", "light running -> ${manager.isReceiverRunning(ReceiverManager.LIGHT_ID)}", ctx)
-                    }, 500)
-                }
-
                 val enableMilli = Calendar.getInstance().put(Calendar.HOUR_OF_DAY, 19).put(Calendar.MINUTE, 0).put(Calendar.SECOND, 0).timeInMillis
                 val disableMilli = Calendar.getInstance().put(Calendar.HOUR_OF_DAY, 7).put(Calendar.MINUTE, 0).put(Calendar.SECOND, 0).timeInMillis
 
-                if (running) {
-                    Handler().postDelayed({
-                        scheduleTimely(manager, enableMilli, disableMilli)
-                    }, 500)
-                } else {
-                    pref.putLong(SUNSET_TIME, enableMilli)
-                    pref.putLong(SUNRISE_TIME, disableMilli)
-                }
+                pref.putLong(SUNSET_TIME, enableMilli)
+                pref.putLong(SUNRISE_TIME, disableMilli)
 
                 dismiss()
             }

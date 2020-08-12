@@ -12,7 +12,7 @@
  * copies or substantial portions of the Software.
  */
 
-package com.alpha.dev.schedule_dark_theme.appService
+package com.alpha.dev.schedule_dark_theme.appService.services
 
 import android.app.Service
 import android.content.Intent
@@ -21,15 +21,11 @@ import android.os.Handler
 import android.os.IBinder
 import com.alpha.dev.schedule_dark_theme.WALL_DARK
 import com.alpha.dev.schedule_dark_theme.WALL_LIGHT
+import com.alpha.dev.schedule_dark_theme.appService.NotificationHelper
 import com.alpha.dev.schedule_dark_theme.makeToast
 import com.alpha.dev.schedule_dark_theme.updateWallpaper
 
 class WallpaperService : Service() {
-
-    companion object {
-        @Volatile
-        var started = false
-    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -66,6 +62,7 @@ class WallpaperService : Service() {
 
     override fun onCreate() {
         handler = Handler()
+        ServiceObserver.wallpaperService.postValue(true)
         startForeground(1, NotificationHelper(applicationContext).serviceNotification().build())
 
         makeToast(applicationContext, "Wallpaper Service started")
@@ -73,10 +70,8 @@ class WallpaperService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (!started) {
-            handler?.post(runnable)
-            started = true
-        }
+        ServiceObserver.wallpaperService.postValue(true)
+        handler?.post(runnable)
         return START_STICKY
     }
 
@@ -87,7 +82,7 @@ class WallpaperService : Service() {
             e.printStackTrace()
         }
         handler = null
-        started = false
+        ServiceObserver.wallpaperService.postValue(false)
 
         makeToast(applicationContext, "Wallpaper Service stopped")
         super.onDestroy()
