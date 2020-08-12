@@ -18,15 +18,15 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     buildToolsVersion "29.0.3"
 
     defaultConfig {
         applicationId "com.alpha.dev.schedule_dark_theme"
-        minSdkVersion 28
-        targetSdkVersion 29
-        versionCode 20
-        versionName "3.0.0-release"
+        minSdkVersion 29
+        targetSdkVersion 30
+        versionCode 21
+        versionName "3.1.0-release"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

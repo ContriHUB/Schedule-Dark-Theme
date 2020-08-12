@@ -277,9 +277,9 @@ fun toggleTheme(context: Context, bin: Int) {
 
 fun updateWallpaper(context: Context, type: Int) {
     if (imageExists(context, type)) {
-        val bitmap = getImage(context, type)
-        bitmap ?: return
         CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
+            val bitmap = getImage(context, type)
+            bitmap ?: return@launch
             WallpaperManager.getInstance(context).setBitmap(bitmap)
             bitmap.recycle()
         }
