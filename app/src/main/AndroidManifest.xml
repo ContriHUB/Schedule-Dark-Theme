@@ -57,7 +57,7 @@
         <receiver android:name=".appService.receivers.ToggleLightTheme" />
         <receiver android:name=".appService.receivers.ToggleDarkTheme" />
         <receiver
-            android:name=".appService.UpdateReceiver"
+            android:name=".appService.receivers.UpdateReceiver"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />

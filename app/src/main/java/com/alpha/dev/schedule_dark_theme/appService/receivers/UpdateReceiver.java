@@ -12,7 +12,7 @@
  * copies or substantial portions of the Software.
  */
 
-package com.alpha.dev.schedule_dark_theme.appService;
+package com.alpha.dev.schedule_dark_theme.appService.receivers;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
