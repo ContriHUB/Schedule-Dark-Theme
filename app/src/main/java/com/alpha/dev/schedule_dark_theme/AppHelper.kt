@@ -17,16 +17,12 @@ package com.alpha.dev.schedule_dark_theme
 import android.Manifest
 import android.app.UiModeManager
 import android.app.WallpaperManager
-import android.content.ContentResolver
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.icu.text.DateFormat
-import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.provider.Settings
-import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.widget.Toast
@@ -42,7 +38,6 @@ import com.ironz.binaryprefs.BinaryPreferencesBuilder
 import com.ironz.binaryprefs.Preferences
 import kotlinx.coroutines.*
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.util.*
@@ -171,97 +166,10 @@ fun imageExists(context: Context, type: Int): Boolean = File(context.getDir(DIR,
     else -> FILE_WALL_DARK
 }).exists()
 
-fun getThumbImage(context: Context, type: Int): Bitmap? = async {
-    val file = File(context.getDir(DIR, Context.MODE_PRIVATE), when (type) {
-        LIGHT -> COMPRESS_LIGHT
-        DARK -> COMPRESS_DARK
-        WALL_LIGHT -> WALL_COMPRESS_LIGHT
-        else -> WALL_COMPRESS_DARK
-    })
-
-    withContext(Dispatchers.IO) {
-        var fis: FileInputStream? = null
-        try {
-            fis = FileInputStream(file)
-            BitmapFactory.decodeStream(fis)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        } finally {
-            try {
-                fis?.close()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-}
-
-fun getImage(context: Context, type: Int): Bitmap? = async {
-    val file = File(context.getDir(DIR, Context.MODE_PRIVATE), when (type) {
-        LIGHT -> FILE_LIGHT
-        DARK -> FILE_DARK
-        WALL_LIGHT -> FILE_WALL_LIGHT
-        else -> FILE_WALL_DARK
-    })
-
-    withContext(Dispatchers.IO) {
-        var fis: FileInputStream? = null
-        try {
-            fis = FileInputStream(file)
-            BitmapFactory.decodeStream(fis)
-        } catch (e: Exception) {
-            e.printStackTrace()
-            null
-        } finally {
-            try {
-                fis?.close()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-}
-
-fun getBitmap(cr: ContentResolver, uri: Uri): Bitmap = async {
-    withContext(Dispatchers.IO) {
-        val ins = cr.openInputStream(uri)
-        val bitmap = BitmapFactory.decodeStream(ins)
-        ins?.close()
-        bitmap
-    }
-}
-
-fun compressBitmap(file: File): Bitmap? = async {
-    val options = BitmapFactory.Options()
-    options.inJustDecodeBounds = true
-
-    withContext(Dispatchers.IO) {
-        val ins = FileInputStream(file)
-        BitmapFactory.decodeStream(ins, null, options)
-        ins.close()
-    }
-
-    var scale = 1
-    while (options.outWidth / scale / 2 >= 100 && options.outHeight / scale / 2 >= 100) {
-        scale *= 2
-    }
-
-    val finalOptions = BitmapFactory.Options()
-    finalOptions.inSampleSize = scale
-
-    withContext(Dispatchers.IO) {
-        val inputStream = FileInputStream(file)
-        val out = BitmapFactory.decodeStream(inputStream, null, finalOptions)
-        inputStream.close()
-        out
-    }
-}
-
 fun toggleTheme(context: Context, bin: Int) {
     Settings.Secure.putInt(context.contentResolver, "ui_night_mode", if (bin == LIGHT) LIGHT else DARK)
     getUiManager(context).enableCarMode(0)
-    getUiManager(context).disableCarMode(0)
+    getUiManager(context).disableCarMode(UiModeManager.DISABLE_CAR_MODE_GO_HOME)
 
     log("Theme", "Switched to ${if (bin == LIGHT) "Light" else "Dark"} Theme", context)
 
@@ -282,46 +190,55 @@ fun updateWallpaper(context: Context, type: Int) {
             bitmap ?: return@launch
             WallpaperManager.getInstance(context).setBitmap(bitmap)
             bitmap.recycle()
+            System.gc()
         }
     }
 }
 
 fun makeToast(context: Context, message: String, duration: Int = Toast.LENGTH_SHORT, imageResource: Int = R.drawable.ic_brightness_4_black_24dp) {
     if (PreferenceHelper(context).getBoolean(TOAST_PREF, true)) {
-        Handler().post {
-            val view = getLayoutInflater(context).inflate(R.layout.toast_layout, null)
+        Handler(context.mainLooper).post {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Toast.makeText(context, message, duration).show()
+            } else {
+                val view = getLayoutInflater(context).inflate(R.layout.toast_layout, null)
 
-            view.findViewById<AppCompatTextView>(R.id.text).text = message
-            view.findViewById<AppCompatImageView>(R.id.tIcon).setImageResource(imageResource)
+                view.findViewById<AppCompatTextView>(R.id.text).text = message
+                view.findViewById<AppCompatImageView>(R.id.tIcon).setImageResource(imageResource)
 
-            val toast = Toast(context.applicationContext)
-            toast.duration = duration
-            toast.setGravity(Gravity.BOTTOM, 0, 200)
-            toast.view = view
-            toast.show()
+                val toast = Toast(context.applicationContext)
+                toast.duration = duration
+                toast.setGravity(Gravity.BOTTOM, 0, 200)
+                toast.view = view
+                toast.show()
+            }
         }
     }
 }
 
 fun systemToast(context: Context, message: String, duration: Int = Toast.LENGTH_SHORT, imageResource: Int = R.drawable.ic_brightness_4_black_24dp) {
     if (PreferenceHelper(context).getBoolean(TOAST_PREF, true)) {
-        Handler().post {
-            val view = getLayoutInflater(context).inflate(R.layout.toast_layout, null)
+        Handler(context.mainLooper).post {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                Toast.makeText(context, message, duration).show()
+            } else {
+                val view = getLayoutInflater(context).inflate(R.layout.toast_layout, null)
 
-            view.findViewById<AppCompatTextView>(R.id.text).text = message
-            view.findViewById<AppCompatImageView>(R.id.tIcon).setImageResource(imageResource)
+                view.findViewById<AppCompatTextView>(R.id.text).text = message
+                view.findViewById<AppCompatImageView>(R.id.tIcon).setImageResource(imageResource)
 
-            val toast = Toast(context.applicationContext)
-            toast.duration = duration
-            toast.setGravity(Gravity.BOTTOM, 0, 200)
-            toast.view = view
-            toast.show()
+                val toast = Toast(context.applicationContext)
+                toast.duration = duration
+                toast.setGravity(Gravity.BOTTOM, 0, 200)
+                toast.view = view
+                toast.show()
+            }
         }
     }
 }
 
 fun log(tag: String, message: String, context: Context) {
-    Log.d(tag, message)
+//    Log.d(tag, message)
     val file = File(context.filesDir, "sch_log.txt")
     var fos: FileOutputStream? = null
     try {

@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity() {
             dialog.setCancelable(false)
             dialog.setCanceledOnTouchOutside(false)
             log("onActivityResult", "Starting process ...", this)
-            Handler().postDelayed({
+            Handler(this.mainLooper).postDelayed({
                 val bitmap = getBitmap(contentResolver, imgUri)
 
                 val dir = getDir(DIR, Context.MODE_PRIVATE)

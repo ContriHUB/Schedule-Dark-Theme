@@ -18,7 +18,9 @@ import android.app.Service
 import android.content.Intent
 import android.content.res.Configuration
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.IBinder
+import android.os.Process
 import com.alpha.dev.schedule_dark_theme.WALL_DARK
 import com.alpha.dev.schedule_dark_theme.WALL_LIGHT
 import com.alpha.dev.schedule_dark_theme.appService.NotificationHelper
@@ -30,6 +32,7 @@ class WallpaperService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     private var currentTheme = -1
+    private val wallpaperThread by lazy { HandlerThread("AutoWallpaperService", Process.THREAD_PRIORITY_BACKGROUND) }
     private var handler: Handler? = null
     private val runnable: Runnable = object : Runnable {
         override fun run() {
@@ -61,7 +64,8 @@ class WallpaperService : Service() {
     }
 
     override fun onCreate() {
-        handler = Handler()
+        wallpaperThread.start()
+        handler = Handler(wallpaperThread.looper)
         ServiceObserver.wallpaperService.postValue(true)
         startForeground(1, NotificationHelper(applicationContext).serviceNotification().build())
 
@@ -78,6 +82,7 @@ class WallpaperService : Service() {
     override fun onDestroy() {
         try {
             handler?.removeCallbacks(runnable)
+            wallpaperThread.quitSafely()
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -85,6 +90,7 @@ class WallpaperService : Service() {
         ServiceObserver.wallpaperService.postValue(false)
 
         makeToast(applicationContext, "Wallpaper Service stopped")
+        System.gc()
         super.onDestroy()
     }
 }

@@ -28,7 +28,6 @@ import com.alpha.dev.fastscroller.FastScrollScrollView
 import com.alpha.dev.fastscroller.FastScrollerBuilder
 import com.alpha.dev.fastscroller.ScrollingViewOnApplyWindowInsetsListener
 import com.alpha.dev.materialdialog.MaterialAlertDialog
-import com.alpha.dev.materialdialog.MaterialDialogInterface
 import com.alpha.dev.schedule_dark_theme.*
 import com.alpha.dev.schedule_dark_theme.appService.services.ServiceObserver
 import com.alpha.dev.schedule_dark_theme.appService.services.WallpaperService
@@ -110,7 +109,7 @@ class WallpaperFeatureFragment(context: Context, private val activity: AppCompat
             MaterialAlertDialog.Builder(ctx)
                     .setTitle("Confirmation")
                     .setMessage("Remove wallpaper for dark theme ?")
-                    .setPositiveButton("Remove", MaterialDialogInterface.OnPositiveClickListener {
+                    .setPositiveButton("Remove") {
                         if (imageExists(ctx, WALL_DARK)) {
                             if (File(ctx.getDir(DIR, Context.MODE_PRIVATE), FILE_WALL_DARK).delete()) {
                                 darkWallpaper.setImageBitmap(null)
@@ -121,16 +120,14 @@ class WallpaperFeatureFragment(context: Context, private val activity: AppCompat
                             }
                         }
                         it.dismiss()
-                    })
-                    .setNegativeButton("Cancel", MaterialDialogInterface.OnNegativeClickListener {
-                        it.dismiss()
-                    }).build()
+                    }
+                .setNegativeButton("Cancel") { it.dismiss() }.build()
         }
         lRemove.setOnClickListener {
             MaterialAlertDialog.Builder(ctx)
                     .setTitle("Confirmation")
                     .setMessage("Remove wallpaper for light theme ?")
-                    .setPositiveButton("Remove", MaterialDialogInterface.OnPositiveClickListener {
+                    .setPositiveButton("Remove") {
                         if (imageExists(ctx, WALL_LIGHT)) {
                             if (File(ctx.getDir(DIR, Context.MODE_PRIVATE), FILE_WALL_LIGHT).delete()) {
                                 lightWallpaper.setImageBitmap(null)
@@ -141,10 +138,8 @@ class WallpaperFeatureFragment(context: Context, private val activity: AppCompat
                             }
                         }
                         it.dismiss()
-                    })
-                    .setNegativeButton("Cancel", MaterialDialogInterface.OnNegativeClickListener {
-                        it.dismiss()
-                    }).build()
+                    }
+                .setNegativeButton("Cancel") { it.dismiss() }.build()
         }
 
         return view

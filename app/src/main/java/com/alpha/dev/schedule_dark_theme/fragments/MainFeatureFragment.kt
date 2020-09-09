@@ -32,9 +32,7 @@ import com.alpha.dev.fastscroller.FastScrollScrollView
 import com.alpha.dev.fastscroller.FastScrollerBuilder
 import com.alpha.dev.fastscroller.ScrollingViewOnApplyWindowInsetsListener
 import com.alpha.dev.materialdialog.MaterialAlertDialog
-import com.alpha.dev.materialdialog.MaterialDialogInterface
 import com.alpha.dev.schedule_dark_theme.*
-import com.alpha.dev.schedule_dark_theme.appService.Interfaces
 import com.alpha.dev.schedule_dark_theme.appService.services.ServiceObserver
 import com.alpha.dev.schedule_dark_theme.appService.services.ThemeService
 import com.google.android.material.card.MaterialCardView
@@ -124,27 +122,10 @@ class MainFeatureFragment(context: Context, private val activity: AppCompatActiv
         scv.setOnApplyWindowInsetsListener(ScrollingViewOnApplyWindowInsetsListener())
         FastScrollerBuilder(scv).useMd2Style().build()
 
-        changeTheme.setOnClickListener {
-            ThemeDialog(ctx).show()
-        }
-
-        dTime.setOnClickListener {
-            TimePicker(ctx, DARK, Interfaces.OnTimeChangeListener {
-                enableTime.text = getTimeString(it)
-            }).show()
-        }
-
-        lTime.setOnClickListener {
-            TimePicker(ctx, LIGHT, Interfaces.OnTimeChangeListener {
-                disableTime.text = getTimeString(it)
-            }).show()
-        }
-
-        triggerChanger.setOnClickListener {
-            TimeTrigger(ctx, Interfaces.OnTriggerChangeListener {
-                currentTrigger.text = it
-            }, dTime, lTime, sunRSet).show()
-        }
+        changeTheme.setOnClickListener { ThemeDialog(ctx).show() }
+        dTime.setOnClickListener { TimePicker(ctx, DARK) { enableTime.text = getTimeString(it) }.show() }
+        lTime.setOnClickListener { TimePicker(ctx, LIGHT) { disableTime.text = getTimeString(it) }.show() }
+        triggerChanger.setOnClickListener { TimeTrigger(ctx, { currentTrigger.text = it }, dTime, lTime, sunRSet).show() }
 
         lightWallpaper.setOnClickListener {
             if (!storagePermissionGranted(ctx)) {
@@ -195,7 +176,7 @@ class MainFeatureFragment(context: Context, private val activity: AppCompatActiv
             MaterialAlertDialog.Builder(ctx)
                     .setTitle("Confirmation")
                     .setMessage("Remove wallpaper for light theme ?")
-                    .setPositiveButton("Remove", MaterialDialogInterface.OnPositiveClickListener {
+                    .setPositiveButton("Remove") {
                         if (imageExists(ctx, LIGHT)) {
                             if (File(ctx.getDir(DIR, Context.MODE_PRIVATE), FILE_LIGHT).delete()) {
                                 log("MainFrag/LightRemove", "Clicked for positive", ctx)
@@ -207,17 +188,17 @@ class MainFeatureFragment(context: Context, private val activity: AppCompatActiv
                             }
                         }
                         it.dismiss()
-                    })
-                    .setNegativeButton("Cancel", MaterialDialogInterface.OnNegativeClickListener {
+                    }
+                    .setNegativeButton("Cancel") {
                         log("MainFrag/LightRemove", "Clicked for negative", ctx)
                         it.dismiss()
-                    }).build()
+                    }.build()
         }
         dRemove.setOnClickListener {
             MaterialAlertDialog.Builder(ctx)
                     .setTitle("Confirmation")
                     .setMessage("Remove wallpaper for dark theme ?")
-                    .setPositiveButton("Remove", MaterialDialogInterface.OnPositiveClickListener {
+                    .setPositiveButton("Remove") {
                         if (imageExists(ctx, DARK)) {
                             if (File(ctx.getDir(DIR, Context.MODE_PRIVATE), FILE_DARK).delete()) {
                                 log("MainFrag/DarkRemove", "Clicked for positive", ctx)
@@ -229,11 +210,11 @@ class MainFeatureFragment(context: Context, private val activity: AppCompatActiv
                             }
                         }
                         it.dismiss()
-                    })
-                    .setNegativeButton("Cancel", MaterialDialogInterface.OnNegativeClickListener {
+                    }
+                    .setNegativeButton("Cancel") {
                         log("MainFrag/DarkRemove", "Clicked for negative", ctx)
                         it.dismiss()
-                    }).build()
+                    }.build()
         }
 
         return view

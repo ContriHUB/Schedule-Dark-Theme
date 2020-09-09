@@ -25,7 +25,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.alpha.dev.fastscroller.FastScrollerBuilder
 import com.alpha.dev.fastscroller.ScrollingViewOnApplyWindowInsetsListener
 import com.alpha.dev.materialdialog.MaterialAlertDialog
-import com.alpha.dev.materialdialog.MaterialDialogInterface
 import kotlinx.android.synthetic.main.activity_log.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -67,7 +66,7 @@ class LogActivity : AppCompatActivity() {
             MaterialAlertDialog.Builder(this)
                     .setTitle("Confirmation")
                     .setMessage("Clear and delete logs ?")
-                    .setPositiveButton("Delete", MaterialDialogInterface.OnPositiveClickListener {
+                    .setPositiveButton("Delete") {
                         try {
                             if (file.delete()) {
                                 it.dismiss()
@@ -81,10 +80,8 @@ class LogActivity : AppCompatActivity() {
                             it.dismiss()
                             systemToast(this, "Error clearing logs\n${e.message}")
                         }
-                    })
-                    .setNegativeButton("Cancel", MaterialDialogInterface.OnNegativeClickListener {
-                        it.dismiss()
-                    }).build()
+                    }
+                    .setNegativeButton("Cancel") { it.dismiss() }.build()
         }
     }
 

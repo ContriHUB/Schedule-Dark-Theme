@@ -20,7 +20,9 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.hardware.display.DisplayManager
 import android.os.Handler
+import android.os.HandlerThread
 import android.os.IBinder
+import android.os.Process
 import android.view.Display
 import com.alpha.dev.schedule_dark_theme.*
 import com.alpha.dev.schedule_dark_theme.appService.NotificationHelper
@@ -37,7 +39,8 @@ class ThemeService : Service() {
     private val helper by lazy { NotificationHelper(applicationContext) }
     private val pref by lazy { PreferenceHelper(applicationContext) }
 
-    private val handler by lazy { Handler() }
+    private val themeThread by lazy { HandlerThread("AutoThemeService", Process.THREAD_PRIORITY_BACKGROUND) }
+    private var handler: Handler? = null
     private val runnable = object : Runnable {
         override fun run() {
             try {
@@ -72,12 +75,14 @@ class ThemeService : Service() {
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
-                handler.postDelayed(this, 60 * 1000 /* One minute */)
+                handler?.postDelayed(this, 60 * 1000 /* One minute */)
             }
         }
     }
 
     override fun onCreate() {
+        themeThread.start()
+        handler = Handler(themeThread.looper)
         ServiceObserver.themeService.postValue(true)
         startForeground(1, NotificationHelper(applicationContext).serviceNotification().build())
 
@@ -87,7 +92,7 @@ class ThemeService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         ServiceObserver.themeService.postValue(true)
-        handler.post(runnable)
+        handler?.post(runnable)
         return START_STICKY
     }
 
@@ -128,9 +133,17 @@ class ThemeService : Service() {
     }
 
     override fun onDestroy() {
-        handler.removeCallbacks(runnable)
+        try {
+            handler?.removeCallbacks(runnable)
+            themeThread.quitSafely()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        handler = null
         ServiceObserver.themeService.postValue(false)
+
         makeToast(applicationContext, "Theme service stopped")
+        System.gc()
         super.onDestroy()
     }
 }
