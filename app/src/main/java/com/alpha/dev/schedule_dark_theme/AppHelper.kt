@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,11 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.card.MaterialCardView
 import com.ironz.binaryprefs.BinaryPreferencesBuilder
 import com.ironz.binaryprefs.Preferences
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -46,33 +50,33 @@ const val enableDeveloperOptions = "&#8226; Go to Settings > About Phone.<br>&#8
 const val connectToUSB = "&#8226; Go to Settings > System > Developer Options.<br>&#8226; Check the USB Debugging box.<br>&#8226; If you don't have adb on your computer, Tap below to download and " +
         "install it. Otherwise, once you have adb, connect your device to computer and Allow the Allow USB Debugging Dialog on your device.<br>NOTE: Developer Options is NOT rooting"
 const val commandStep =
-        "&#8226; Open command prompt on computer and type the below command.<br>&#8226; <strong>adb shell pm grant com.alpha.dev.schedule_dark_theme android.permission.WRITE_SECURE_SETTINGS</strong>"
+    "&#8226; Open command prompt on computer and type the below command.<br>&#8226; <strong>adb shell pm grant com.alpha.dev.schedule_dark_theme android.permission.WRITE_SECURE_SETTINGS</strong>"
 const val ADBDownloadLink = "https://drive.google.com/file/d/1TXesESvDEATvVchPDFYmvEkKanXmJzFQ/view?usp=sharing"
 const val PRIVACY_STATEMENT =
-        "Shashank Verma built the Schedule Dark Theme app as a Free app. This SERVICE is provided by me at no cost and is intended for use as is.<br><br>This page is used " +
-                "to inform visitors regarding my policies with the collection and use if anyone decided to use my Service.<br>" +
-                "<br>" +
-                "The terms used in this Privacy Policy have the same meanings as in our Terms and Conditions, which is accessible at Schedule Dark Theme unless otherwise defined in this Privacy Policy.<br>" +
-                "<br>" +
-                "<strong>Information Collection and Use</strong><br>" +
-                "<br>" +
-                "NO Information collected, This is offline app.<br>" +
-                "<br>" +
-                "<strong>Security</strong><br>" +
-                "<br>" +
-                "This app is scanned by Google Play Protect.<br>" +
-                "<br>" +
-                "<strong>Links to Other Sites</strong><br>" +
-                "<br>" +
-                "This app contains link to developer's Google drive's folder for resource as mentioned in app.<br>" +
-                "<br>" +
-                "<strong>Changes to This Privacy Policy</strong><br>" +
-                "<br>" +
-                "I may update our Privacy Policy from time to time. Thus, you are advised to review this page periodically for any changes. I will notify you of any changes by posting the new Privacy Policy on this page. These changes are effective immediately after they are posted on this page.<br>" +
-                "<br>" +
-                "<strong>Contact Us</strong><br>" +
-                "<br>" +
-                "If you have any questions or suggestions about my Privacy Policy, do not hesitate to contact me at shashank.verma2002@gmail.com."
+    "Shashank Verma built the Schedule Dark Theme app as a Free app. This SERVICE is provided by me at no cost and is intended for use as is.<br><br>This page is used " +
+            "to inform visitors regarding my policies with the collection and use if anyone decided to use my Service.<br>" +
+            "<br>" +
+            "The terms used in this Privacy Policy have the same meanings as in our Terms and Conditions, which is accessible at Schedule Dark Theme unless otherwise defined in this Privacy Policy.<br>" +
+            "<br>" +
+            "<strong>Information Collection and Use</strong><br>" +
+            "<br>" +
+            "NO Information collected, This is offline app.<br>" +
+            "<br>" +
+            "<strong>Security</strong><br>" +
+            "<br>" +
+            "This app is scanned by Google Play Protect.<br>" +
+            "<br>" +
+            "<strong>Links to Other Sites</strong><br>" +
+            "<br>" +
+            "This app contains link to developer's Google drive's folder for resource as mentioned in app.<br>" +
+            "<br>" +
+            "<strong>Changes to This Privacy Policy</strong><br>" +
+            "<br>" +
+            "I may update our Privacy Policy from time to time. Thus, you are advised to review this page periodically for any changes. I will notify you of any changes by posting the new Privacy Policy on this page. These changes are effective immediately after they are posted on this page.<br>" +
+            "<br>" +
+            "<strong>Contact Us</strong><br>" +
+            "<br>" +
+            "If you have any questions or suggestions about my Privacy Policy, do not hesitate to contact me at shashank.verma2002@gmail.com."
 
 
 const val LIGHT = 1
@@ -159,12 +163,14 @@ fun getStoragePermission(context: Context, activity: AppCompatActivity) {
     }
 }
 
-fun imageExists(context: Context, type: Int): Boolean = File(context.getDir(DIR, Context.MODE_PRIVATE), when (type) {
-    LIGHT -> FILE_LIGHT
-    DARK -> FILE_DARK
-    WALL_LIGHT -> FILE_WALL_LIGHT
-    else -> FILE_WALL_DARK
-}).exists()
+fun imageExists(context: Context, type: Int): Boolean = File(
+    context.getDir(DIR, Context.MODE_PRIVATE), when (type) {
+        LIGHT -> FILE_LIGHT
+        DARK -> FILE_DARK
+        WALL_LIGHT -> FILE_WALL_LIGHT
+        else -> FILE_WALL_DARK
+    }
+).exists()
 
 fun toggleTheme(context: Context, bin: Int) {
     Settings.Secure.putInt(context.contentResolver, "ui_night_mode", if (bin == LIGHT) LIGHT else DARK)
@@ -174,8 +180,8 @@ fun toggleTheme(context: Context, bin: Int) {
     log("Theme", "Switched to ${if (bin == LIGHT) "Light" else "Dark"} Theme", context)
 
     makeToast(
-            context, "Switched to ${if (bin == LIGHT) "Light" else "Dark"} Theme", Toast.LENGTH_LONG,
-            if (bin == LIGHT) R.drawable.ic_brightness_7_black_24dp else R.drawable.ic_brightness_2_black_24dp
+        context, "Switched to ${if (bin == LIGHT) "Light" else "Dark"} Theme", Toast.LENGTH_LONG,
+        if (bin == LIGHT) R.drawable.ic_brightness_7_black_24dp else R.drawable.ic_brightness_2_black_24dp
     )
 
     if (PreferenceHelper(context).getBoolean(WALLPAPER_ENABLED, false)) {
@@ -260,8 +266,8 @@ class PreferenceHelper(private val context: Context) {
     private fun getPreference(): Preferences {
         if (preference == null) {
             preference = BinaryPreferencesBuilder(context.applicationContext)
-                    .name(PREF_NAME)
-                    .build()
+                .name(PREF_NAME)
+                .build()
         }
         return preference!!
     }

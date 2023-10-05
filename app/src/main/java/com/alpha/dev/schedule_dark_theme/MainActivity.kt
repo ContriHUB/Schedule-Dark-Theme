@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,16 +28,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
-import com.alpha.dev.materialdialog.MaterialProgressDialog
+import com.alpha.dev.schedule_dark_theme.databinding.ActivityMainBinding
 import com.alpha.dev.schedule_dark_theme.fragments.MainFeatureFragment
 import com.alpha.dev.schedule_dark_theme.fragments.WallpaperFeatureFragment
-import kotlinx.android.synthetic.main.activity_main.*
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.util.*
-import kotlin.collections.ArrayList
 
 class MainActivity : AppCompatActivity() {
 
@@ -48,15 +47,18 @@ class MainActivity : AppCompatActivity() {
     private lateinit var mainFrag: MainFeatureFragment
     private lateinit var wallFrag: WallpaperFeatureFragment
 
+    private lateinit var binding: ActivityMainBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         log("\r\nSTARTUP", "<== MAIN ACTIVITY STARTED ==>\n", this)
 
         checkAndSetTimes()
 
-        toolbar.setOnMenuItemClickListener { item ->
+        binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.contact_dev -> {
                     log("Main/Toolbar", "Clicked item -> Contact Dev", this)
@@ -90,7 +92,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.share -> {
                     log("Main/Toolbar", "Clicked item -> Share", this)
                     val shareIntent =
-                            Intent(Intent.ACTION_SEND).putExtra(Intent.EXTRA_TEXT, "Hey check out this app at: https://play.google.com/store/apps/details?id=$packageName").setType("text/plain")
+                        Intent(Intent.ACTION_SEND).putExtra(Intent.EXTRA_TEXT, "Hey check out this app at: https://play.google.com/store/apps/details?id=$packageName").setType("text/plain")
                     startActivity(shareIntent)
 
                     true
@@ -112,8 +114,8 @@ class MainActivity : AppCompatActivity() {
         adapter.addItem(mainFrag, "Auto Theme")
         adapter.addItem(wallFrag, "Auto Wallpaper")
 
-        viewPager.adapter = adapter
-        tabLayout.setupWithViewPager(viewPager, true)
+        binding.viewPager.adapter = adapter
+        binding.tabLayout.setupWithViewPager(binding.viewPager, true)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -124,11 +126,12 @@ class MainActivity : AppCompatActivity() {
             val imgUri = data.data
             imgUri ?: return
 
-            val dialog = MaterialProgressDialog(this)
-            dialog.setTitle("Processing")
-            dialog.setMessage("Optimising sample")
-            dialog.setCancelable(false)
-            dialog.setCanceledOnTouchOutside(false)
+            val dialog = MaterialAlertDialogBuilder(this)
+                .setTitle("Processing")
+                .setMessage("Optimising sample")
+                .setCancelable(false)
+                .setOnDismissListener { }
+                .show()
             log("onActivityResult", "Starting process ...", this)
             Handler(this.mainLooper).postDelayed({
                 val bitmap = getBitmap(contentResolver, imgUri)
@@ -138,42 +141,52 @@ class MainActivity : AppCompatActivity() {
                     dir.mkdir()
                 }
                 log(TAG, "REQUEST CODE => $requestCode", this)
-                val path = File(dir, when (requestCode) {
-                    IMAGE_RETRIEVE_LIGHT -> {
-                        log(TAG, "path -> $FILE_LIGHT", this)
-                        FILE_LIGHT
+                val path = File(
+                    dir, when (requestCode) {
+                        IMAGE_RETRIEVE_LIGHT -> {
+                            log(TAG, "path -> $FILE_LIGHT", this)
+                            FILE_LIGHT
+                        }
+
+                        IMAGE_RETRIEVE_DARK -> {
+                            log(TAG, "path -> $FILE_DARK", this)
+                            FILE_DARK
+                        }
+
+                        WALL_RETRIEVE_LIGHT -> {
+                            log(TAG, "path -> $FILE_WALL_LIGHT", this)
+                            FILE_WALL_LIGHT
+                        }
+
+                        else -> {
+                            log(TAG, "path -> $FILE_WALL_DARK", this)
+                            FILE_WALL_DARK
+                        }
                     }
-                    IMAGE_RETRIEVE_DARK -> {
-                        log(TAG, "path -> $FILE_DARK", this)
-                        FILE_DARK
+                )
+                val thumbPath = File(
+                    dir, when (requestCode) {
+                        IMAGE_RETRIEVE_LIGHT -> {
+                            log(TAG, "thumb path -> $COMPRESS_LIGHT", this)
+                            COMPRESS_LIGHT
+                        }
+
+                        IMAGE_RETRIEVE_DARK -> {
+                            log(TAG, "thumb path -> $COMPRESS_DARK", this)
+                            COMPRESS_DARK
+                        }
+
+                        WALL_RETRIEVE_LIGHT -> {
+                            log(TAG, "thumb path -> $WALL_COMPRESS_LIGHT", this)
+                            WALL_COMPRESS_LIGHT
+                        }
+
+                        else -> {
+                            log(TAG, "thumb path -> $WALL_COMPRESS_DARK", this)
+                            WALL_COMPRESS_DARK
+                        }
                     }
-                    WALL_RETRIEVE_LIGHT -> {
-                        log(TAG, "path -> $FILE_WALL_LIGHT", this)
-                        FILE_WALL_LIGHT
-                    }
-                    else -> {
-                        log(TAG, "path -> $FILE_WALL_DARK", this)
-                        FILE_WALL_DARK
-                    }
-                })
-                val thumbPath = File(dir, when (requestCode) {
-                    IMAGE_RETRIEVE_LIGHT -> {
-                        log(TAG, "thumb path -> $COMPRESS_LIGHT", this)
-                        COMPRESS_LIGHT
-                    }
-                    IMAGE_RETRIEVE_DARK -> {
-                        log(TAG, "thumb path -> $COMPRESS_DARK", this)
-                        COMPRESS_DARK
-                    }
-                    WALL_RETRIEVE_LIGHT -> {
-                        log(TAG, "thumb path -> $WALL_COMPRESS_LIGHT", this)
-                        WALL_COMPRESS_LIGHT
-                    }
-                    else -> {
-                        log(TAG, "thumb path -> $WALL_COMPRESS_DARK", this)
-                        WALL_COMPRESS_DARK
-                    }
-                })
+                )
                 saveImage(path, thumbPath, bitmap)
 
                 when (requestCode) {
@@ -184,6 +197,7 @@ class MainActivity : AppCompatActivity() {
 
                         sCheck?.isChecked = imageExists(this, LIGHT) || imageExists(this, DARK)
                     }
+
                     IMAGE_RETRIEVE_DARK -> {
                         sImgView?.setImageBitmap(getThumbImage(this, DARK))
                         sEmptyImg?.visibility = View.GONE
@@ -191,6 +205,7 @@ class MainActivity : AppCompatActivity() {
 
                         sCheck?.isChecked = imageExists(this, LIGHT) || imageExists(this, DARK)
                     }
+
                     WALL_RETRIEVE_LIGHT -> {
                         sImgView?.setImageBitmap(getThumbImage(this, WALL_LIGHT))
                         sEmptyImg?.visibility = View.GONE
@@ -198,6 +213,7 @@ class MainActivity : AppCompatActivity() {
 
                         sCheck?.isChecked = imageExists(this, WALL_LIGHT) || imageExists(this, WALL_DARK)
                     }
+
                     WALL_RETRIEVE_DARK -> {
                         sImgView?.setImageBitmap(getThumbImage(this, WALL_DARK))
                         sEmptyImg?.visibility = View.GONE
@@ -213,8 +229,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun saveImage(path: File, thumbPath: File, bitmap: Bitmap) = async {
-        var fos: FileOutputStream? = null
         launch(Dispatchers.IO) {
+            var fos: FileOutputStream? = null
             try {
                 fos = FileOutputStream(path)
                 bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)

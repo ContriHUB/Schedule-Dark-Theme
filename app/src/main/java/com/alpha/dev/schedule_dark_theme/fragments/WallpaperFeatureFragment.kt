@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,14 +24,30 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
-import com.alpha.dev.fastscroller.FastScrollScrollView
-import com.alpha.dev.fastscroller.FastScrollerBuilder
-import com.alpha.dev.fastscroller.ScrollingViewOnApplyWindowInsetsListener
-import com.alpha.dev.materialdialog.MaterialAlertDialog
-import com.alpha.dev.schedule_dark_theme.*
+import com.alpha.dev.schedule_dark_theme.DIR
+import com.alpha.dev.schedule_dark_theme.ENABLE_FEATURE
+import com.alpha.dev.schedule_dark_theme.FILE_WALL_DARK
+import com.alpha.dev.schedule_dark_theme.FILE_WALL_LIGHT
+import com.alpha.dev.schedule_dark_theme.PreferenceHelper
+import com.alpha.dev.schedule_dark_theme.R
+import com.alpha.dev.schedule_dark_theme.WALL_DARK
+import com.alpha.dev.schedule_dark_theme.WALL_FEATURE
+import com.alpha.dev.schedule_dark_theme.WALL_LIGHT
+import com.alpha.dev.schedule_dark_theme.WALL_RETRIEVE_DARK
+import com.alpha.dev.schedule_dark_theme.WALL_RETRIEVE_LIGHT
 import com.alpha.dev.schedule_dark_theme.appService.services.ServiceObserver
 import com.alpha.dev.schedule_dark_theme.appService.services.WallpaperService
+import com.alpha.dev.schedule_dark_theme.getStoragePermission
+import com.alpha.dev.schedule_dark_theme.getThumbImage
+import com.alpha.dev.schedule_dark_theme.imageExists
+import com.alpha.dev.schedule_dark_theme.sCardV
+import com.alpha.dev.schedule_dark_theme.sCheck
+import com.alpha.dev.schedule_dark_theme.sEmptyImg
+import com.alpha.dev.schedule_dark_theme.sImgView
+import com.alpha.dev.schedule_dark_theme.storagePermissionGranted
+import com.alpha.dev.schedule_dark_theme.systemToast
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
 
 class WallpaperFeatureFragment(context: Context, private val activity: AppCompatActivity) : Fragment() {
@@ -39,7 +55,6 @@ class WallpaperFeatureFragment(context: Context, private val activity: AppCompat
     private val ctx = context
 
     private val pref by lazy { PreferenceHelper(ctx) }
-    private lateinit var scv: FastScrollScrollView
 
     private lateinit var featureToggle: SwitchCompat
 
@@ -102,44 +117,42 @@ class WallpaperFeatureFragment(context: Context, private val activity: AppCompat
             }
         }
 
-        scv.setOnApplyWindowInsetsListener(ScrollingViewOnApplyWindowInsetsListener())
-        FastScrollerBuilder(scv).useMd2Style().build()
-
         dRemove.setOnClickListener {
-            MaterialAlertDialog.Builder(ctx)
-                    .setTitle("Confirmation")
-                    .setMessage("Remove wallpaper for dark theme ?")
-                    .setPositiveButton("Remove") {
-                        if (imageExists(ctx, WALL_DARK)) {
-                            if (File(ctx.getDir(DIR, Context.MODE_PRIVATE), FILE_WALL_DARK).delete()) {
-                                darkWallpaper.setImageBitmap(null)
-                                dRemove.visibility = View.GONE
-                                dEmpty.visibility = View.VISIBLE
+            MaterialAlertDialogBuilder(ctx)
+                .setTitle("Confirmation")
+                .setMessage("Remove wallpaper for dark theme ?")
+                .setPositiveButton("Remove") { dialog, _ ->
+                    if (imageExists(ctx, WALL_DARK)) {
+                        if (File(ctx.getDir(DIR, Context.MODE_PRIVATE), FILE_WALL_DARK).delete()) {
+                            darkWallpaper.setImageBitmap(null)
+                            dRemove.visibility = View.GONE
+                            dEmpty.visibility = View.VISIBLE
 
-                                featureToggle.isChecked = imageExists(ctx, WALL_LIGHT) || imageExists(ctx, WALL_DARK)
-                            }
+                            featureToggle.isChecked = imageExists(ctx, WALL_LIGHT) || imageExists(ctx, WALL_DARK)
                         }
-                        it.dismiss()
                     }
-                .setNegativeButton("Cancel") { it.dismiss() }.build()
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.show()
         }
         lRemove.setOnClickListener {
-            MaterialAlertDialog.Builder(ctx)
-                    .setTitle("Confirmation")
-                    .setMessage("Remove wallpaper for light theme ?")
-                    .setPositiveButton("Remove") {
-                        if (imageExists(ctx, WALL_LIGHT)) {
-                            if (File(ctx.getDir(DIR, Context.MODE_PRIVATE), FILE_WALL_LIGHT).delete()) {
-                                lightWallpaper.setImageBitmap(null)
-                                lRemove.visibility = View.GONE
-                                lEmpty.visibility = View.VISIBLE
+            MaterialAlertDialogBuilder(ctx)
+                .setTitle("Confirmation")
+                .setMessage("Remove wallpaper for light theme ?")
+                .setPositiveButton("Remove") { dialog, _ ->
+                    if (imageExists(ctx, WALL_LIGHT)) {
+                        if (File(ctx.getDir(DIR, Context.MODE_PRIVATE), FILE_WALL_LIGHT).delete()) {
+                            lightWallpaper.setImageBitmap(null)
+                            lRemove.visibility = View.GONE
+                            lEmpty.visibility = View.VISIBLE
 
-                                featureToggle.isChecked = imageExists(ctx, WALL_LIGHT) || imageExists(ctx, WALL_DARK)
-                            }
+                            featureToggle.isChecked = imageExists(ctx, WALL_LIGHT) || imageExists(ctx, WALL_DARK)
                         }
-                        it.dismiss()
                     }
-                .setNegativeButton("Cancel") { it.dismiss() }.build()
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+                .show()
         }
 
         return view
@@ -179,7 +192,5 @@ class WallpaperFeatureFragment(context: Context, private val activity: AppCompat
 
         lRemove = view.findViewById(R.id.l_remove)
         dRemove = view.findViewById(R.id.d_remove)
-
-        scv = view.findViewById(R.id.w_f_scv)
     }
 }

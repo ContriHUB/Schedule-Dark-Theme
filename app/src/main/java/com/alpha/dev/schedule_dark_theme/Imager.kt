@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,12 +35,14 @@ fun getThumbImage(context: Context, type: Int): Bitmap? = async { getAsyncThumbI
  * Method to retrieve thumb image
  */
 private fun getAsyncThumbImage(context: Context, type: Int): Bitmap? {
-    val file = File(context.getDir(DIR, Context.MODE_PRIVATE), when (type) {
-        LIGHT -> COMPRESS_LIGHT
-        DARK -> COMPRESS_DARK
-        WALL_LIGHT -> WALL_COMPRESS_LIGHT
-        else -> WALL_COMPRESS_DARK
-    })
+    val file = File(
+        context.getDir(DIR, Context.MODE_PRIVATE), when (type) {
+            LIGHT -> COMPRESS_LIGHT
+            DARK -> COMPRESS_DARK
+            WALL_LIGHT -> WALL_COMPRESS_LIGHT
+            else -> WALL_COMPRESS_DARK
+        }
+    )
 
     var fis: FileInputStream? = null
     return try {
@@ -67,12 +69,14 @@ fun getImage(context: Context, type: Int): Bitmap? = async { getAsyncImage(conte
  * Method to retrieve main image
  */
 private fun getAsyncImage(context: Context, type: Int): Bitmap? {
-    val file = File(context.getDir(DIR, Context.MODE_PRIVATE), when (type) {
-        LIGHT -> FILE_LIGHT
-        DARK -> FILE_DARK
-        WALL_LIGHT -> FILE_WALL_LIGHT
-        else -> FILE_WALL_DARK
-    })
+    val file = File(
+        context.getDir(DIR, Context.MODE_PRIVATE), when (type) {
+            LIGHT -> FILE_LIGHT
+            DARK -> FILE_DARK
+            WALL_LIGHT -> FILE_WALL_LIGHT
+            else -> FILE_WALL_DARK
+        }
+    )
 
     var fis: FileInputStream? = null
     return try {

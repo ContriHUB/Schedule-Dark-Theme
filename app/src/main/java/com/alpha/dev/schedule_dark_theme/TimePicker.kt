@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@ import android.text.format.DateFormat
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDialog
 import com.alpha.dev.schedule_dark_theme.appService.Interfaces
-import kotlinx.android.synthetic.main.time_picker.*
+import com.alpha.dev.schedule_dark_theme.databinding.TimePickerBinding
 import java.util.*
 
 class TimePicker(context: Context, private val modeDark: Int, onTimeChangeListener: Interfaces.OnTimeChangeListener) : AppCompatDialog(context) {
@@ -33,31 +33,34 @@ class TimePicker(context: Context, private val modeDark: Int, onTimeChangeListen
     private var hour = -9
     private var min = -9
 
+    private lateinit var binding: TimePickerBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.time_picker)
+        binding = TimePickerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         window!!.setBackgroundDrawableResource(R.drawable.bg_recent)
 
         val cM = Calendar.getInstance()
 
-        timePicker.hour = cM.get(Calendar.HOUR_OF_DAY)
-        timePicker.minute = cM.get(Calendar.MINUTE)
+        binding.timePicker.hour = cM.get(Calendar.HOUR_OF_DAY)
+        binding.timePicker.minute = cM.get(Calendar.MINUTE)
         hour = cM.get(Calendar.HOUR_OF_DAY)
         min = cM.get(Calendar.MINUTE)
-        timePicker.setIs24HourView(DateFormat.is24HourFormat(ctx))
+        binding.timePicker.setIs24HourView(DateFormat.is24HourFormat(ctx))
 
-        log(tag, "onCreate: is24Hour ?= ${timePicker.is24HourView}", ctx)
+        log(tag, "onCreate: is24Hour ?= ${binding.timePicker.is24HourView}", ctx)
 
-        cancelBtn.setOnClickListener { dismiss() }
+        binding.cancelBtn.setOnClickListener { dismiss() }
 
-        timePicker.setOnTimeChangedListener { _, i, i2 ->
+        binding.timePicker.setOnTimeChangedListener { _, i, i2 ->
             hour = i
             min = i2
 
             log(tag, "onTimeChange: Hour = $i \n Minute = $i2", ctx)
         }
 
-        doneBtn.setOnClickListener {
+        binding.doneBtn.setOnClickListener {
             val pref = PreferenceHelper(ctx)
             if (modeDark == DARK) {
                 log(tag, "mode = DARK", ctx)

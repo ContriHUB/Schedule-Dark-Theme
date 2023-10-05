@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,10 +22,8 @@ import android.os.Bundle
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.alpha.dev.fastscroller.FastScrollerBuilder
-import com.alpha.dev.fastscroller.ScrollingViewOnApplyWindowInsetsListener
-import com.alpha.dev.materialdialog.MaterialAlertDialog
-import kotlinx.android.synthetic.main.activity_log.*
+import com.alpha.dev.schedule_dark_theme.databinding.ActivityLogBinding
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -35,26 +33,26 @@ import java.io.IOException
 
 class LogActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityLogBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_log)
-
-        scv_log.setOnApplyWindowInsetsListener(ScrollingViewOnApplyWindowInsetsListener())
-        FastScrollerBuilder(scv_log).useMd2Style().build()
+        binding = ActivityLogBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
         var logsTxt = ""
         val file = File(filesDir, "sch_log.txt")
-        l_pr.visibility = View.VISIBLE
+        binding.lPr.visibility = View.VISIBLE
 
         CoroutineScope(Dispatchers.IO).launch(Dispatchers.IO) {
             file.forEachLine { line -> logsTxt += "$line\n" }
             withContext(Dispatchers.Main) {
-                showLog.text = logsTxt
-                l_pr.visibility = View.GONE
+                binding.showLog.text = logsTxt
+                binding.lPr.visibility = View.GONE
             }
         }
 
-        copyLog.setOnClickListener {
+        binding.copyLog.setOnClickListener {
             val clipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             val clipData = ClipData.newPlainText("Logs", logsTxt)
 
@@ -62,26 +60,27 @@ class LogActivity : AppCompatActivity() {
             systemToast(this, "Logs Copied", Toast.LENGTH_LONG, R.drawable.ic_content_copy_black_24dp)
         }
 
-        clearLog.setOnClickListener {
-            MaterialAlertDialog.Builder(this)
-                    .setTitle("Confirmation")
-                    .setMessage("Clear and delete logs ?")
-                    .setPositiveButton("Delete") {
-                        try {
-                            if (file.delete()) {
-                                it.dismiss()
-                                super.onBackPressed()
-                            } else {
-                                it.dismiss()
-                                systemToast(this, "Error clearing logs")
-                            }
-                        } catch (e: IOException) {
-                            e.printStackTrace()
-                            it.dismiss()
-                            systemToast(this, "Error clearing logs\n${e.message}")
+        binding.clearLog.setOnClickListener {
+            MaterialAlertDialogBuilder(this)
+                .setTitle("Confirmation")
+                .setMessage("Clear and delete logs ?")
+                .setPositiveButton("Delete") { dialog, _ ->
+                    try {
+                        if (file.delete()) {
+                            dialog.dismiss()
+                            super.onBackPressed()
+                        } else {
+                            dialog.dismiss()
+                            systemToast(this, "Error clearing logs")
                         }
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                        dialog.dismiss()
+                        systemToast(this, "Error clearing logs\n${e.message}")
                     }
-                    .setNegativeButton("Cancel") { it.dismiss() }.build()
+                }
+                .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+                .show()
         }
     }
 

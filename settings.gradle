@@ -12,5 +12,22 @@
  * copies or substantial portions of the Software.
  */
 
-include ':app', ':fastscroller', ':materialdialog'
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://jitpack.io' }
+    }
+}
+
+include ':app'
 rootProject.name='Schedule Dark Theme'

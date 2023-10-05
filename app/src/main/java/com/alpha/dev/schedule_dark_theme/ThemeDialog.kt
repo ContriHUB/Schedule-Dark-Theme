@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -18,24 +18,27 @@ import android.content.Context
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.app.AppCompatDialog
-import kotlinx.android.synthetic.main.theme_dialog.*
+import com.alpha.dev.schedule_dark_theme.databinding.ThemeDialogBinding
 
 class ThemeDialog(context: Context) : AppCompatDialog(context) {
 
     private val ctx = context
 
+    private lateinit var binding: ThemeDialogBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.theme_dialog)
+        binding = ThemeDialogBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         window!!.setBackgroundDrawableResource(R.drawable.bg_recent)
 
         when (PreferenceHelper(ctx).getInt(THEME, defTheme)) {
-            AppCompatDelegate.MODE_NIGHT_YES -> darkCheck.isChecked = true
-            AppCompatDelegate.MODE_NIGHT_NO -> lightCheck.isChecked = true
-            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> defaultCheck.isChecked = true
+            AppCompatDelegate.MODE_NIGHT_YES -> binding.darkCheck.isChecked = true
+            AppCompatDelegate.MODE_NIGHT_NO -> binding.lightCheck.isChecked = true
+            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> binding.defaultCheck.isChecked = true
         }
 
-        lightCheck.setOnCheckedChangeListener { compoundButton, _ ->
+        binding.lightCheck.setOnCheckedChangeListener { compoundButton, _ ->
             if (compoundButton.isChecked) {
                 log("Theme", "App Theme -> MODE_NIGHT_NO", ctx)
                 saveTheme(AppCompatDelegate.MODE_NIGHT_NO)
@@ -44,7 +47,7 @@ class ThemeDialog(context: Context) : AppCompatDialog(context) {
             }
         }
 
-        darkCheck.setOnCheckedChangeListener { compoundButton, _ ->
+        binding.darkCheck.setOnCheckedChangeListener { compoundButton, _ ->
             if (compoundButton.isChecked) {
                 log("Theme", "App Theme -> MODE_NIGHT_YES", ctx)
                 saveTheme(AppCompatDelegate.MODE_NIGHT_YES)
@@ -53,7 +56,7 @@ class ThemeDialog(context: Context) : AppCompatDialog(context) {
             }
         }
 
-        defaultCheck.setOnCheckedChangeListener { compoundButton, _ ->
+        binding.defaultCheck.setOnCheckedChangeListener { compoundButton, _ ->
             if (compoundButton.isChecked) {
                 log("Theme", "App Theme -> MODE_NIGHT_FOLLOW_SYSTEM", ctx)
                 saveTheme(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)

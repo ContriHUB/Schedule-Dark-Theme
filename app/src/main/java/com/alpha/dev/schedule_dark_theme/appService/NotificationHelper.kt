@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -62,25 +62,25 @@ class NotificationHelper(ctx: Context) : ContextWrapper(ctx) {
     fun serviceNotification(): NotificationCompat.Builder {
 
         val openSettings = PendingIntent.getActivity(
-                applicationContext,
-                -1,
-                Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK).putExtra(
-                        Settings.EXTRA_APP_PACKAGE,
-                        applicationContext.packageName
-                ).putExtra(Settings.EXTRA_CHANNEL_ID, channelID), 0
+            applicationContext,
+            -1,
+            Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK).putExtra(
+                Settings.EXTRA_APP_PACKAGE,
+                applicationContext.packageName
+            ).putExtra(Settings.EXTRA_CHANNEL_ID, channelID), 0
         )
 
         return NotificationCompat.Builder(applicationContext, channelID)
-                .setContentTitle("Running Service")
-                .setSmallIcon(R.drawable.ic_brightness_4_black_24dp)
-                .setColorized(true)
-                .setContentText("Tap here and disable this notifications :P")
-                .setStyle(NotificationCompat.BigTextStyle())
-                .setColor(getColor(R.color.pixel))
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setOngoing(true)
-                .setSound(null)
-                .setContentIntent(openSettings)
+            .setContentTitle("Running Service")
+            .setSmallIcon(R.drawable.ic_brightness_4_black_24dp)
+            .setColorized(true)
+            .setContentText("Tap here and disable this notifications :P")
+            .setStyle(NotificationCompat.BigTextStyle())
+            .setColor(getColor(R.color.pixel))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setOngoing(true)
+            .setSound(null)
+            .setContentIntent(openSettings)
         /*.addAction(
             R.drawable.ic_brightness_2_black_24dp,
             "Enable Dark Theme",
@@ -110,24 +110,24 @@ class NotificationHelper(ctx: Context) : ContextWrapper(ctx) {
           val openIntent = PendingIntent.getActivity(applicationContext, 0, actIntent, 0)*/
 
         return NotificationCompat.Builder(applicationContext, channelID2)
-                .setContentTitle("Change Theme (Dark)")
-                .setSmallIcon(R.drawable.ic_brightness_4_black_24dp)
-                .setColorized(true)
-                .setContentText("It's time to shift to Dark theme. We don\'t mean to scare you by suddenly changing to dark theme. Tap below to switch to Dark theme :P")
-                .setStyle(NotificationCompat.BigTextStyle())
-                .setColor(getColor(R.color.pixel))
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setSound(null)
-                .addAction(
-                        R.drawable.ic_brightness_2_black_24dp,
-                        "Enable Dark Theme",
-                        PendingIntent.getBroadcast(applicationContext, 3, Intent(applicationContext, ToggleDarkTheme::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
-                )
-                .addAction(
-                        R.drawable.ic_close_black_24dp,
-                        "Cancel",
-                        PendingIntent.getBroadcast(applicationContext, 4, Intent(applicationContext, CancelSwitch::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
-                )
+            .setContentTitle("Change Theme (Dark)")
+            .setSmallIcon(R.drawable.ic_brightness_4_black_24dp)
+            .setColorized(true)
+            .setContentText("It's time to shift to Dark theme. We don\'t mean to scare you by suddenly changing to dark theme. Tap below to switch to Dark theme :P")
+            .setStyle(NotificationCompat.BigTextStyle())
+            .setColor(getColor(R.color.pixel))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setSound(null)
+            .addAction(
+                R.drawable.ic_brightness_2_black_24dp,
+                "Enable Dark Theme",
+                PendingIntent.getBroadcast(applicationContext, 3, Intent(applicationContext, ToggleDarkTheme::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
+            )
+            .addAction(
+                R.drawable.ic_close_black_24dp,
+                "Cancel",
+                PendingIntent.getBroadcast(applicationContext, 4, Intent(applicationContext, CancelSwitch::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
+            )
     }
 
     fun lightRunningNotification(): NotificationCompat.Builder {
@@ -138,24 +138,24 @@ class NotificationHelper(ctx: Context) : ContextWrapper(ctx) {
         val openIntent = PendingIntent.getActivity(applicationContext, 0, actIntent, PendingIntent.FLAG_UPDATE_CURRENT)*/
 
         return NotificationCompat.Builder(applicationContext, channelID2)
-                .setContentTitle("Change Theme (Light)")
-                .setSmallIcon(R.drawable.ic_brightness_4_black_24dp)     //create icon
-                .setColorized(true)
-                .setContentText("It's time to shift to Light theme. We don\'t mean to scare you by suddenly changing to light theme. Tap below to switch to Light theme :P")
-                .setStyle(NotificationCompat.BigTextStyle())
-                .setColor(getColor(R.color.pixel))
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setSound(null)
-                .addAction(
-                        R.drawable.ic_brightness_7_black_24dp,
-                        "Enable Light Theme",
-                        PendingIntent.getBroadcast(applicationContext, 3, Intent(applicationContext, ToggleLightTheme::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
-                )
-                .addAction(
-                        R.drawable.ic_close_black_24dp,
-                        "Cancel",
-                        PendingIntent.getBroadcast(applicationContext, 4, Intent(applicationContext, CancelSwitch::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
-                )
+            .setContentTitle("Change Theme (Light)")
+            .setSmallIcon(R.drawable.ic_brightness_4_black_24dp)     //create icon
+            .setColorized(true)
+            .setContentText("It's time to shift to Light theme. We don\'t mean to scare you by suddenly changing to light theme. Tap below to switch to Light theme :P")
+            .setStyle(NotificationCompat.BigTextStyle())
+            .setColor(getColor(R.color.pixel))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setSound(null)
+            .addAction(
+                R.drawable.ic_brightness_7_black_24dp,
+                "Enable Light Theme",
+                PendingIntent.getBroadcast(applicationContext, 3, Intent(applicationContext, ToggleLightTheme::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
+            )
+            .addAction(
+                R.drawable.ic_close_black_24dp,
+                "Cancel",
+                PendingIntent.getBroadcast(applicationContext, 4, Intent(applicationContext, CancelSwitch::class.java), PendingIntent.FLAG_UPDATE_CURRENT)
+            )
     }
 
     fun recreateChannel() {

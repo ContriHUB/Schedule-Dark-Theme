@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@ import com.alpha.dev.schedule_dark_theme.DARK
 import com.alpha.dev.schedule_dark_theme.appService.NotificationHelper
 import com.alpha.dev.schedule_dark_theme.toggleTheme
 
-class ToggleDarkTheme: BroadcastReceiver() {
+class ToggleDarkTheme : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent?) {
         toggleTheme(context, DARK)

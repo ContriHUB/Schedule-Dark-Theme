@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +46,7 @@ class WallpaperService : Service() {
                             currentTheme = Configuration.UI_MODE_NIGHT_YES
                         }
                     }
+
                     Configuration.UI_MODE_NIGHT_NO -> {
                         if (currentTheme != Configuration.UI_MODE_NIGHT_NO) {
                             updateWallpaper(applicationContext, WALL_LIGHT)

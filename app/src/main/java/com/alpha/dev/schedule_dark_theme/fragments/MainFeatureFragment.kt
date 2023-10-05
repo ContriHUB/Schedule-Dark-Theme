@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,14 +28,50 @@ import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
-import com.alpha.dev.fastscroller.FastScrollScrollView
-import com.alpha.dev.fastscroller.FastScrollerBuilder
-import com.alpha.dev.fastscroller.ScrollingViewOnApplyWindowInsetsListener
-import com.alpha.dev.materialdialog.MaterialAlertDialog
-import com.alpha.dev.schedule_dark_theme.*
+import com.alpha.dev.schedule_dark_theme.COMPRESS_DARK
+import com.alpha.dev.schedule_dark_theme.COMPRESS_LIGHT
+import com.alpha.dev.schedule_dark_theme.DARK
+import com.alpha.dev.schedule_dark_theme.DEFAULT_DISABLE_TIME
+import com.alpha.dev.schedule_dark_theme.DEFAULT_ENABLE_TIME
+import com.alpha.dev.schedule_dark_theme.DIR
+import com.alpha.dev.schedule_dark_theme.ENABLE_FEATURE
+import com.alpha.dev.schedule_dark_theme.FILE_DARK
+import com.alpha.dev.schedule_dark_theme.FILE_LIGHT
+import com.alpha.dev.schedule_dark_theme.IMAGE_RETRIEVE_DARK
+import com.alpha.dev.schedule_dark_theme.IMAGE_RETRIEVE_LIGHT
+import com.alpha.dev.schedule_dark_theme.LIGHT
+import com.alpha.dev.schedule_dark_theme.LOCK_PREF
+import com.alpha.dev.schedule_dark_theme.PreferenceHelper
+import com.alpha.dev.schedule_dark_theme.R
+import com.alpha.dev.schedule_dark_theme.SUN_SET_RISE
+import com.alpha.dev.schedule_dark_theme.THEME
+import com.alpha.dev.schedule_dark_theme.TIME_DISABLE
+import com.alpha.dev.schedule_dark_theme.TIME_ENABLE
+import com.alpha.dev.schedule_dark_theme.TIME_SLOTS
+import com.alpha.dev.schedule_dark_theme.TOAST_PREF
+import com.alpha.dev.schedule_dark_theme.TRIGGER_TIME
+import com.alpha.dev.schedule_dark_theme.ThemeDialog
+import com.alpha.dev.schedule_dark_theme.TimePicker
+import com.alpha.dev.schedule_dark_theme.TimeTrigger
+import com.alpha.dev.schedule_dark_theme.WALLPAPER_ENABLED
+import com.alpha.dev.schedule_dark_theme.WALL_FEATURE
 import com.alpha.dev.schedule_dark_theme.appService.services.ServiceObserver
 import com.alpha.dev.schedule_dark_theme.appService.services.ThemeService
+import com.alpha.dev.schedule_dark_theme.defTheme
+import com.alpha.dev.schedule_dark_theme.getStoragePermission
+import com.alpha.dev.schedule_dark_theme.getThumbImage
+import com.alpha.dev.schedule_dark_theme.imageExists
+import com.alpha.dev.schedule_dark_theme.log
+import com.alpha.dev.schedule_dark_theme.makeToast
+import com.alpha.dev.schedule_dark_theme.putTimeInMillis
+import com.alpha.dev.schedule_dark_theme.sCardV
+import com.alpha.dev.schedule_dark_theme.sCheck
+import com.alpha.dev.schedule_dark_theme.sEmptyImg
+import com.alpha.dev.schedule_dark_theme.sImgView
+import com.alpha.dev.schedule_dark_theme.storagePermissionGranted
+import com.alpha.dev.schedule_dark_theme.systemToast
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.io.File
 import java.util.*
 
@@ -46,7 +82,6 @@ class MainFeatureFragment(context: Context, private val activity: AppCompatActiv
     private val ctx = context
 
     private val pref by lazy { PreferenceHelper(context) }
-    private lateinit var scv: FastScrollScrollView
 
     private lateinit var enableTime: AppCompatTextView
     private lateinit var disableTime: AppCompatTextView
@@ -96,6 +131,7 @@ class MainFeatureFragment(context: Context, private val activity: AppCompatActiv
                 lTime.visibility = View.VISIBLE
                 sunRSet.visibility = View.GONE
             }
+
             SUN_SET_RISE -> {
                 dTime.visibility = View.GONE
                 lTime.visibility = View.GONE
@@ -118,9 +154,6 @@ class MainFeatureFragment(context: Context, private val activity: AppCompatActiv
         switchFeature.setOnCheckedChangeListener { _, isChecked -> toggleFeature(isChecked) }
         toastToggle.setOnCheckedChangeListener { _, isChecked -> pref.putBoolean(TOAST_PREF, isChecked) }
         wallCheck.setOnCheckedChangeListener { _, isChecked -> pref.putBoolean(WALLPAPER_ENABLED, isChecked) }
-
-        scv.setOnApplyWindowInsetsListener(ScrollingViewOnApplyWindowInsetsListener())
-        FastScrollerBuilder(scv).useMd2Style().build()
 
         changeTheme.setOnClickListener { ThemeDialog(ctx).show() }
         dTime.setOnClickListener { TimePicker(ctx, DARK) { enableTime.text = getTimeString(it) }.show() }
@@ -173,57 +206,54 @@ class MainFeatureFragment(context: Context, private val activity: AppCompatActiv
         }
 
         lRemove.setOnClickListener {
-            MaterialAlertDialog.Builder(ctx)
-                    .setTitle("Confirmation")
-                    .setMessage("Remove wallpaper for light theme ?")
-                    .setPositiveButton("Remove") {
-                        if (imageExists(ctx, LIGHT)) {
-                            if (File(ctx.getDir(DIR, Context.MODE_PRIVATE), FILE_LIGHT).delete()) {
-                                log("MainFrag/LightRemove", "Clicked for positive", ctx)
-                                lightWallpaper.setImageBitmap(null)
-                                lRemove.visibility = View.GONE
-                                lEmpty.visibility = View.VISIBLE
+            MaterialAlertDialogBuilder(ctx)
+                .setTitle("Confirmation")
+                .setMessage("Remove wallpaper for light theme ?")
+                .setPositiveButton("Remove") { dialog, _ ->
+                    if (imageExists(ctx, LIGHT)) {
+                        if (File(ctx.getDir(DIR, Context.MODE_PRIVATE), FILE_LIGHT).delete()) {
+                            log("MainFrag/LightRemove", "Clicked for positive", ctx)
+                            lightWallpaper.setImageBitmap(null)
+                            lRemove.visibility = View.GONE
+                            lEmpty.visibility = View.VISIBLE
 
-                                wallCheck.isChecked = imageExists(ctx, LIGHT) || imageExists(ctx, DARK)
-                            }
+                            wallCheck.isChecked = imageExists(ctx, LIGHT) || imageExists(ctx, DARK)
                         }
-                        it.dismiss()
                     }
-                    .setNegativeButton("Cancel") {
-                        log("MainFrag/LightRemove", "Clicked for negative", ctx)
-                        it.dismiss()
-                    }.build()
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    log("MainFrag/LightRemove", "Clicked for negative", ctx)
+                    dialog.dismiss()
+                }.show()
         }
         dRemove.setOnClickListener {
-            MaterialAlertDialog.Builder(ctx)
-                    .setTitle("Confirmation")
-                    .setMessage("Remove wallpaper for dark theme ?")
-                    .setPositiveButton("Remove") {
-                        if (imageExists(ctx, DARK)) {
-                            if (File(ctx.getDir(DIR, Context.MODE_PRIVATE), FILE_DARK).delete()) {
-                                log("MainFrag/DarkRemove", "Clicked for positive", ctx)
-                                darkWallpaper.setImageBitmap(null)
-                                dRemove.visibility = View.GONE
-                                dEmpty.visibility = View.VISIBLE
+            MaterialAlertDialogBuilder(ctx)
+                .setTitle("Confirmation")
+                .setMessage("Remove wallpaper for dark theme ?")
+                .setPositiveButton("Remove") { dialog, _ ->
+                    if (imageExists(ctx, DARK)) {
+                        if (File(ctx.getDir(DIR, Context.MODE_PRIVATE), FILE_DARK).delete()) {
+                            log("MainFrag/DarkRemove", "Clicked for positive", ctx)
+                            darkWallpaper.setImageBitmap(null)
+                            dRemove.visibility = View.GONE
+                            dEmpty.visibility = View.VISIBLE
 
-                                wallCheck.isChecked = imageExists(ctx, LIGHT) || imageExists(ctx, DARK)
-                            }
+                            wallCheck.isChecked = imageExists(ctx, LIGHT) || imageExists(ctx, DARK)
                         }
-                        it.dismiss()
                     }
-                    .setNegativeButton("Cancel") {
-                        log("MainFrag/DarkRemove", "Clicked for negative", ctx)
-                        it.dismiss()
-                    }.build()
+                    dialog.dismiss()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    log("MainFrag/DarkRemove", "Clicked for negative", ctx)
+                    dialog.dismiss()
+                }.show()
         }
 
         return view
     }
 
     private fun initiateViews(view: View) {
-        //--> FastScroll
-        scv = view.findViewById(R.id.m_f_scv)
-
         //--> TextView
         enableTime = view.findViewById(R.id.enableTime)
         disableTime = view.findViewById(R.id.disableTime)

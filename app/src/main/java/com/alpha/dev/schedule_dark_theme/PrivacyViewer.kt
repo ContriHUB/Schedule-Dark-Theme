@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -18,19 +18,18 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.text.Html
 import androidx.appcompat.app.AppCompatActivity
-import com.alpha.dev.fastscroller.FastScrollerBuilder
-import com.alpha.dev.fastscroller.ScrollingViewOnApplyWindowInsetsListener
-import kotlinx.android.synthetic.main.activity_privacy_viewer.*
+import com.alpha.dev.schedule_dark_theme.databinding.ActivityPrivacyViewerBinding
 
 class PrivacyViewer : AppCompatActivity() {
 
+    private lateinit var binding: ActivityPrivacyViewerBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_privacy_viewer)
+        binding = ActivityPrivacyViewerBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        privacyInfo.text = Html.fromHtml(PRIVACY_STATEMENT, Html.FROM_HTML_MODE_LEGACY)
-        p_svc.setOnApplyWindowInsetsListener(ScrollingViewOnApplyWindowInsetsListener())
-        FastScrollerBuilder(p_svc).useMd2Style().build()
+        binding.privacyInfo.text = Html.fromHtml(PRIVACY_STATEMENT, Html.FROM_HTML_MODE_LEGACY)
     }
 
     override fun onBackPressed() {

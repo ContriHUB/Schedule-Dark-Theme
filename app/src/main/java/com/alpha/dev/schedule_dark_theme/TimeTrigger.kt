@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,27 +19,32 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatDialog
 import com.alpha.dev.schedule_dark_theme.appService.Interfaces
+import com.alpha.dev.schedule_dark_theme.databinding.TriggerLayoutBinding
 import com.google.android.material.card.MaterialCardView
-import kotlinx.android.synthetic.main.trigger_layout.*
 import java.util.*
 
-class TimeTrigger(context: Context, private val listener: Interfaces.OnTriggerChangeListener,
-                  private val dCard: MaterialCardView, private val lCard: MaterialCardView, private val sunCard: MaterialCardView) : AppCompatDialog(context) {
+class TimeTrigger(
+    context: Context, private val listener: Interfaces.OnTriggerChangeListener,
+    private val dCard: MaterialCardView, private val lCard: MaterialCardView, private val sunCard: MaterialCardView
+) : AppCompatDialog(context) {
 
     private val ctx = context
 
+    private lateinit var binding: TriggerLayoutBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.trigger_layout)
+        binding = TriggerLayoutBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         window!!.setBackgroundDrawableResource(R.drawable.bg_recent)
 
         val pref = PreferenceHelper(ctx)
         when (pref.getInt(TRIGGER_TIME, TIME_SLOTS)) {
-            TIME_SLOTS -> timeCheck.isChecked = true
-            SUN_SET_RISE -> sunCheck.isChecked = true
+            TIME_SLOTS -> binding.timeCheck.isChecked = true
+            SUN_SET_RISE -> binding.sunCheck.isChecked = true
         }
 
-        timeCheck.setOnCheckedChangeListener { _, isChecked ->
+        binding.timeCheck.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 pref.putInt(TRIGGER_TIME, TIME_SLOTS)
                 listener.onChange(ctx.getString(R.string.time_slots))
@@ -52,7 +57,7 @@ class TimeTrigger(context: Context, private val listener: Interfaces.OnTriggerCh
             }
         }
 
-        sunCheck.setOnCheckedChangeListener { _, isChecked ->
+        binding.sunCheck.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 pref.putInt(TRIGGER_TIME, SUN_SET_RISE)
                 listener.onChange(ctx.getString(R.string.sunrise_sunset))

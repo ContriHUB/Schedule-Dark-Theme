@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Shashank Verma <shashank.verma2002@gmail.com>
+ * Copyright (c) 2023, Shashank Verma <shashank.verma2002@gmail.com>
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,22 @@ import android.os.HandlerThread
 import android.os.IBinder
 import android.os.Process
 import android.view.Display
-import com.alpha.dev.schedule_dark_theme.*
+import com.alpha.dev.schedule_dark_theme.DARK
+import com.alpha.dev.schedule_dark_theme.DEFAULT_ENABLE_TIME
+import com.alpha.dev.schedule_dark_theme.LIGHT
+import com.alpha.dev.schedule_dark_theme.LOCK_PREF
+import com.alpha.dev.schedule_dark_theme.PreferenceHelper
+import com.alpha.dev.schedule_dark_theme.SUNRISE_TIME
+import com.alpha.dev.schedule_dark_theme.SUNSET_TIME
+import com.alpha.dev.schedule_dark_theme.TIME_DISABLE
+import com.alpha.dev.schedule_dark_theme.TIME_ENABLE
+import com.alpha.dev.schedule_dark_theme.TIME_SLOTS
+import com.alpha.dev.schedule_dark_theme.TRIGGER_TIME
 import com.alpha.dev.schedule_dark_theme.appService.NotificationHelper
+import com.alpha.dev.schedule_dark_theme.log
+import com.alpha.dev.schedule_dark_theme.makeToast
+import com.alpha.dev.schedule_dark_theme.putTimeInMillis
+import com.alpha.dev.schedule_dark_theme.toggleTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -47,15 +61,19 @@ class ThemeService : Service() {
                 CoroutineScope(Dispatchers.Default).launch(Dispatchers.Default) {
                     val mode = pref.getInt(TRIGGER_TIME, TIME_SLOTS)
                     if (mode != -1) {
-                        val dark = getClockHands(when (mode) {
-                            TIME_SLOTS -> pref.getLong(TIME_ENABLE, DEFAULT_ENABLE_TIME)
-                            else -> pref.getLong(SUNSET_TIME, DEFAULT_ENABLE_TIME)
-                        })
+                        val dark = getClockHands(
+                            when (mode) {
+                                TIME_SLOTS -> pref.getLong(TIME_ENABLE, DEFAULT_ENABLE_TIME)
+                                else -> pref.getLong(SUNSET_TIME, DEFAULT_ENABLE_TIME)
+                            }
+                        )
 
-                        val light = getClockHands(when (mode) {
-                            TIME_SLOTS -> pref.getLong(TIME_DISABLE, DEFAULT_ENABLE_TIME)
-                            else -> pref.getLong(SUNRISE_TIME, DEFAULT_ENABLE_TIME)
-                        })
+                        val light = getClockHands(
+                            when (mode) {
+                                TIME_SLOTS -> pref.getLong(TIME_DISABLE, DEFAULT_ENABLE_TIME)
+                                else -> pref.getLong(SUNRISE_TIME, DEFAULT_ENABLE_TIME)
+                            }
+                        )
 
                         val current = getClockHands(System.currentTimeMillis())
 
