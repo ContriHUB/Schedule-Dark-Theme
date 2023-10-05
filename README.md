@@ -1,16 +1,24 @@
+
 # Schedule-Dark-Theme
 <img alt="img" src="images/play_store.png" height="120px"/>
 
-### A Simple app allowing users to schedule dark theme AND change wallpaper when theme changes :)
+A Simple app allowing users to schedule dark theme AND change wallpaper when theme changes :)
 
-#### For Android 10 and above
+For Android 10 and above
 
 <a href="https://play.google.com/store/apps/details?id=com.alpha.dev.schedule_dark_theme"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height="60px"/></a>
 
 <img alt="screenshot" src="images/Screenshot1.png" height="490px"/>    <img alt="screenshot" src="images/Screenshot2.png" height="490px"/>    <img alt="screenshot" src="images/Screenshot3.png" height="490px"/>    <img alt="screenshot" src="images/Screenshot4.png" height="490px"/>
 
-<br><br>
+## Get Started
 
+- ```
+  git clone https://github.com/ContriHUB/Schedule-Dark-Theme.git
+  ```
+- USB Debugging enabled
+- ADB setted up
+
+## LICENSE
 ```
 MIT License
 
